@@ -15,7 +15,7 @@ window.onload = function () {
     drawElement.push(plateau);
     //palteau.animate();
 
-    carte = new Carte('./images/boo.jpg',50,50,100,200);
+    carte = new Carte('./images/boo.jpg',50,50,100,200,'nom');
     drawElement.push(carte);
 
     drawAll();
@@ -158,8 +158,9 @@ class Carte{
     #y;
     #width;
     #height;
+    #nom;
 
-    constructor(imgSrc,x,y,width,height) {
+    constructor(imgSrc,x,y,width,height,nom) {
         this.#img = new Image();
         this.#img.src = imgSrc;
         console.log(this.#img.src);
@@ -170,6 +171,7 @@ class Carte{
         this.#y = y;
         this.#width = width;
         this.#height = height;
+        this.#nom = nom;
         
     }
 
@@ -180,7 +182,10 @@ class Carte{
 
         context.fillStyle = 'green';
         context.fillRect(this.#x,this.#y,this.#width,this.#height);
-        context.drawImage(this.#img,this.#x,this.#y,this.#width,this.#height/3);
+        context.fillStyle = 'black';
+        context.textAlign = 'center';
+        context.fillText(this.#nom,this.#x+this.#width/2,this.#y+this.#height/8);
+        context.drawImage(this.#img,this.#x,this.#y+this.#height/4,this.#width,this.#height/3);
         /*this.#img.onload = ()=>{
             console.log(this.#x);
             console.log(this.#y);
