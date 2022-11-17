@@ -114,10 +114,7 @@ window.addEventListener('resize',function(){
 })
 
 class Plateau {
-    #listeCarte = {
-        listeCarteIa: new Array(4),
-        listeCarteJoueur: new Array(4),
-    };
+    #cardList;
     width;
     height;
     x;
@@ -131,16 +128,19 @@ class Plateau {
         //this.#draw();
 
         let tmpY = this.y;
+        let emplacementPos = 0;
         for (let i = 0; i < 2; i++) {
             let tmpX = this.x;
             for (let index = 0; index < 4; index++) {
-                let emplacement = new Emplacement(tmpX,tmpY, this.width/4*0.8, this.height/2*0.8);
+                let emplacement = new Emplacement(tmpX,tmpY, this.width/4*0.8, this.height/2*0.8, emplacementPos);
                 elements.push(emplacement);
                 this.listeEmplacements.push(emplacement);
+                emplacementPos++;
                 tmpX+=this.width/4;
             }
             tmpY+=this.height/2;
         }
+        this.#cardList = [];
     }
 
     draw(){
@@ -168,6 +168,14 @@ class Plateau {
             
         }
     }
+
+    addCard(card, pos){
+        this.#cardList[pos] = card;
+    }
+    getCard(pos){
+        return this.#cardList[pos];
+    }
+
     /*animate(){
         this.width = canvas.width/2;
         this.height = canvas.height/2;
@@ -198,8 +206,9 @@ class Emplacement{
     #color;
     #isMouseHover;
     #isFull;
+    #pos;
 
-    constructor(x,y,width,height){
+    constructor(x,y,width,height,pos){
         this.#x = x;
         this.#y = y;
         this.#width = width;
@@ -207,6 +216,7 @@ class Emplacement{
         this.#color = 'white';
         this.#isMouseHover = false;
         this.#isFull = false;
+        this.#pos = pos;
         //this.#draw();
     }
 
@@ -260,7 +270,6 @@ class Emplacement{
             if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
                 this.#isMouseHover = true;
                 //console.log(selectedCard);
-                
             }else{
                 this.#isMouseHover = false;
             }
@@ -268,13 +277,13 @@ class Emplacement{
     }
 
     mouseClick(){
-        console.log(selectedCard);
-        if (!this.#isFull && selectedCard != undefined) {
+        if (!this.#isFull && selectedCard != undefined && this.#pos >3) {
             selectedCard.setX(this.#x);
             selectedCard.setY(this.#y);
             selectedCard.setWidth(this.#width);
             selectedCard.setHeight(this.#height);
             selectedCard.setPlayed();
+            plateau.addCard(selectedCard, this.#pos);
             this.#isFull = true
             selectedCard = undefined;
         }
