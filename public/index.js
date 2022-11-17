@@ -197,6 +197,7 @@ class Emplacement{
     #height;
     #color;
     #isMouseHover;
+    #isFull;
 
     constructor(x,y,width,height){
         this.#x = x;
@@ -205,6 +206,7 @@ class Emplacement{
         this.#height = height;
         this.#color = 'white';
         this.#isMouseHover = false;
+        this.#isFull = false;
         //this.#draw();
     }
 
@@ -213,7 +215,7 @@ class Emplacement{
         this.#y = y;
         this.#width = width;
         this.#height = height;
-        if (this.#isMouseHover) {
+        if (this.#isMouseHover && !this.#isFull) {
             this.#color = 'yellow';
         }else{
             this.#color = 'white';
@@ -254,28 +256,28 @@ class Emplacement{
     }
 
     mouseHover(x,y){
-        if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
-            this.#isMouseHover = true;
-            //console.log(selectedCard);
-            
-        }else{
-            this.#isMouseHover = false;
-        }
+        if (!this.#isFull) {
+            if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
+                this.#isMouseHover = true;
+                //console.log(selectedCard);
+                
+            }else{
+                this.#isMouseHover = false;
+            }
+        }  
     }
 
     mouseClick(){
         console.log(selectedCard);
-        if (selectedCard != undefined) {
+        if (!this.#isFull && selectedCard != undefined) {
             selectedCard.setX(this.#x);
             selectedCard.setY(this.#y);
             selectedCard.setWidth(this.#width);
             selectedCard.setHeight(this.#height);
             selectedCard.setPlayed();
-            console.log(selectedCard);
+            this.#isFull = true
             selectedCard = undefined;
         }
-        selectedCard = undefined;
-        console.log(selectedCard);
     }
 }
 
