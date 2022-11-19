@@ -79,20 +79,12 @@ window.onload = function () {
     drawElement.push(plateau);
     //palteau.animate();
 
-    carte = new Carte('./images/boo.jpg',50,50,'nom');
-    drawElement.push(carte);
-    elements.push(carte);
-
-    carte2 = new Carte('./images/boo.jpg',200,50,'carte2');
-    drawElement.push(carte2);
-    elements.push(carte2);
-    //selectedCard = carte;
-
     main = new Main();
     drawElement.push(main);
 
-    let pioche = new Pioche();
+    pioche = new Pioche();
     drawElement.push(pioche);
+    elements.push(pioche);
     //elements.push(pioche);
 
     drawAll(0);
@@ -268,6 +260,12 @@ class Emplacement{
         this.#draw();
         //requestAnimationFrame(this.animate.bind(this));
     }*/
+    getX(){
+        return this.#x;
+    }
+    getY(){
+        return this.#y;
+    }
     setX(x){
         this.#x = x;
     }
@@ -276,13 +274,6 @@ class Emplacement{
     }
     setColor(color){
         this.#color = color;
-    }
-
-    getX(){
-        return this.#x;
-    }
-    getY(){
-        return this.#y;
     }
     getWidth(){
         return this.#width;
@@ -308,6 +299,7 @@ class Emplacement{
             selectedCard.setPlayed();
             plateau.addCard(selectedCard, this.#pos);
             this.#isFull = true
+            main.retirerCarte(selectedCard);
             selectedCard = undefined;
         }
     }
@@ -377,8 +369,8 @@ class Carte{
         if (!this.#isPlayed) {
             if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
                 if (!this.#isMouseHover) {
-                    this.#width = cardWidth*1.25;
-                    this.#height = cardHeight*1.25;
+                    this.#width = cardWidth*1.05;
+                    this.#height = cardHeight*1.05;
                 }
                 this.#isMouseHover = true;
             }else{
@@ -394,6 +386,14 @@ class Carte{
         if (!this.#isPlayed) {
             selectedCard = this;
         }
+    }
+
+    getX(){
+        return this.#x;
+    }
+
+    getY(){
+        return this.#y;
     }
 
     setX(x){
@@ -443,7 +443,7 @@ class Main{
         this.#height = canvas.height - this.#y;
         this.#listeCartes = []; 
         this.#cardGap = canvas.width/8*0.2;
-        this.#cardPos = this.width/2 - cardWidth/2;
+        this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
     }
 
     draw(){
@@ -453,6 +453,51 @@ class Main{
         this.#height = canvas.height - this.#y;
         context.fillStyle = 'gray';
         context.fillRect(this.#x,this.#y, this.#width,this.#height);
+    }
+
+    getListeCartes()
+    {
+        return this.#listeCartes;
+    }
+
+    retirerCarte(carte)
+    {
+        var carteTrouvee = false;
+        for(var i = 0; i < this.#listeCartes.length; i++){ 
+            if (carteTrouvee == false) {
+                this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth/2 + this.#cardGap/2));
+            }
+            else {
+                this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth/2 + this.#cardGap/2));
+            }
+            if ( this.#listeCartes[i] == carte) { 
+                carteTrouvee = true;
+                this.#listeCartes.splice(i, 1); 
+                i--;
+            }
+        }
+    }
+
+    ajoutCarte(nouvCarte)
+    {
+        if (this.#listeCartes.length == 0) {
+            //console.log("feur");
+            nouvCarte.setX(this.#cardPos);
+            nouvCarte.setY(this.#y);
+            console.log(nouvCarte.getX());
+            this.#listeCartes.push(nouvCarte);
+        }
+        else {
+            for (let i = 0; i < this.#listeCartes.length; i++)
+            {
+                let carte = this.#listeCartes[i];
+                //console.log(carte);
+                carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+            }
+            nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX()+ cardWidth + this.#cardGap);
+            nouvCarte.setY(this.#y);
+            this.#listeCartes.push(nouvCarte);
+        }
     }
 
     refreshPosInfo(){
@@ -472,6 +517,11 @@ class Pioche{
         this.#width = plateau.width/4*0.8;
         this.#height = plateau.height/2*0.8;
     }
+
+    getX() { return this.#x;}
+    getY() { return this.#y;}
+    getWidth() { return this.#width};
+    getHeight() { return this.#height;}
 
     draw(){
         this.#x = canvas.width - canvas.width/6;
@@ -494,7 +544,12 @@ class Pioche{
     }
 
     mouseClick(){
-
+        if (main.getListeCartes().length < 5) {
+            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv');
+            main.ajoutCarte(carte);
+            drawElement.push(carte);
+            elements.push(carte);
+        }
     }
 }
 
