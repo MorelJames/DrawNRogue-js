@@ -16,6 +16,7 @@ let plateau;
 let lineWidth;
 let selectedCard;
 let main;
+let ia;
 
 let cardWidth;
 let cardHeight;
@@ -24,6 +25,7 @@ let endTurn;
 
 let canDraw;
 let canPlay;
+
 
 window.onload = function () {
     canvas = document.querySelector('canvas');
@@ -88,6 +90,8 @@ window.onload = function () {
     drawElement.push(plateau);
     //palteau.animate();
 
+    ia = new Ia();
+
     main = new Main();
     drawElement.push(main);
 
@@ -95,9 +99,10 @@ window.onload = function () {
 
     endTurnButton = new EndTurnButton();
 
-    let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
-    
-    plateau.addCard(carteTest,0);
+    //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
+    //plateau.addCard(carteTest,0);
+
+
     //elements.push(pioche);
 
     drawAll(0);
@@ -195,7 +200,10 @@ class Plateau {
     }
 
     addCard(card, pos){
+        card.setX(this.listeEmplacements[pos].getX());
+        card.setY(this.listeEmplacements[pos].getY());
         this.#cardList[pos] = card;
+        
     }
     getCard(pos){
         return this.#cardList[pos];
@@ -690,6 +698,7 @@ class EndTurnButton{
 
     mouseClick(){
         endTurn = true;
+        ia.play();
         plateau.action();
     }
 
@@ -705,5 +714,35 @@ class EndTurnButton{
     }
     getHeight(){
         return this.#height;
+    }
+}
+
+class Ia{
+    #hp;
+    #cardList;
+    constructor(){
+        this.#hp = 10;
+        this.#cardList =   [{'name':'card1','atk':1,'hp':5},
+                            {'name':'card2','atk':1,'hp':5},
+                            {'name':'card3','atk':1,'hp':5},
+                            {'name':'card4','atk':1,'hp':5}];
+    }
+
+    play(){
+        let card = this.#cardList[Math.floor(Math.random()*this.#cardList.length)];
+        let availablePlace = [];
+        for (let i = 0; i < 4; i++) {
+            if (plateau.getCard(i) == undefined) {
+                console.log(i);
+                availablePlace.push(i);
+            }
+            
+        }
+        if (availablePlace.length >0) {
+            let pos = availablePlace[Math.floor(Math.random()*availablePlace.length)];
+            let newCard = new Carte('./images/boo.jpg',1,1,card.name,card.hp,card.atk);
+            plateau.addCard(newCard,pos);
+        }
+        
     }
 }
