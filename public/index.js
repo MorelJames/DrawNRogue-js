@@ -16,6 +16,7 @@ let plateau;
 let lineWidth;
 let selectedCard;
 let main;
+let ia;
 
 let cardWidth;
 let cardHeight;
@@ -25,11 +26,21 @@ let endTurn;
 let canDraw;
 let canPlay;
 
+let aspectRatio;
+
+let maxWidth;
+let maxHeight;
+
+
 window.onload = function () {
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    maxWidth = window.innerWidth;
+    maxHeight = window.innerHeight;
+    canvas.width = maxWidth;
+    canvas.height = maxHeight;
+
+    aspectRatio = 16/9;
 
     rect = canvas.getBoundingClientRect();
     offSetX = canvas.width / rect.width,
@@ -88,16 +99,20 @@ window.onload = function () {
     drawElement.push(plateau);
     //palteau.animate();
 
+    ia = new Ia();
+
     main = new Main();
     drawElement.push(main);
 
     pioche = new Pioche();
 
     endTurnButton = new EndTurnButton();
-
-    let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     
-    plateau.addCard(carteTest,0);
+
+    //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
+    //plateau.addCard(carteTest,0);
+
+
     //elements.push(pioche);
 
     drawAll(0);
@@ -127,15 +142,36 @@ function drawAll(timeStamp){
     requestAnimationFrame(drawAll);
 }
 
-window.addEventListener('resize',function(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+window.addEventListener('resize',function(e){
+    let ratioW =maxWidth/window.innerWidth;
+    let ratioH =  maxHeight/window.innerHeight;
+
+    if (ratioW<ratioH) {
+        canvas.width = maxWidth * 1/ratioH,
+        canvas.height =maxHeight * 1/ratioH;
+    }else{
+        canvas.width = maxWidth * 1/ratioW,
+        canvas.height =maxHeight * 1/ratioW;
+    }
+    console.log('win');
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+
+     
+    console.log('can');
+    console.log(canvas.width);
+    
+    console.log(canvas.height);
+    
     context.lineWidth = canvas.width/100;
     cardWidth = canvas.width/8*0.8;
     cardHeight = canvas.height/4*0.8;
     context.clearRect(0,0,canvas.width,canvas.height);
     drawElement.forEach(elem => elem.draw());
     main.refreshPosInfo();
+    if (main.getListeCartes()[0] != undefined){
+        main.reajusterCartes();
+    }
 })
 
 class Plateau {
@@ -240,6 +276,7 @@ class Plateau {
             }
             
         }
+        console.log(canPlay);
     }
 
     /*animate(){
@@ -359,6 +396,7 @@ class Emplacement{
             main.retirerCarte(selectedCard);
             selectedCard = undefined;
             canPlay = false;
+            console.log("test");
         }
     }
     
@@ -407,10 +445,7 @@ class Carte{
             if (i >-1) {
                 drawElement.splice(i,1);
             }
-            i = elements.indexOf(this);
-            if (i>-1) {
-                elements.splice(i);
-            }
+            
             
         }
         
@@ -588,6 +623,24 @@ class Main{
         this.#height = canvas.height - this.#y;
         context.fillStyle = 'gray';
         context.fillRect(this.#x,this.#y, this.#width,this.#height);
+
+    }
+
+    reajusterCartes(){
+        this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
+        let carte = this.#listeCartes[0];
+        let nouvCarte;
+        carte.setX(this.#cardPos);
+        carte.setY(this.#y);
+
+        let i;
+        for (i = 1; i<this.#listeCartes.length; i++) {
+            carte = this.#listeCartes[i-1];
+            nouvCarte = this.#listeCartes[i];
+            carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+            nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
+            nouvCarte.setY(this.#y);
+        }
     }
 
     getListeCartes()
@@ -612,6 +665,11 @@ class Main{
                 console.log( this.#listeCartes);
                 i--;
             }
+        }
+
+        let j = elements.indexOf(carte);
+        if (j>-1) {
+            elements.splice(j,1);
         }
     }
 
@@ -735,6 +793,7 @@ class EndTurnButton{
 
     mouseClick(){
         endTurn = true;
+        ia.play();
         plateau.action();
     }
 
@@ -753,6 +812,36 @@ class EndTurnButton{
     }
 }
 
+
+class Ia{
+    #hp;
+    #cardList;
+    constructor(){
+        this.#hp = 10;
+        this.#cardList =   [{'name':'card1','atk':1,'hp':5},
+                            {'name':'card2','atk':1,'hp':5},
+                            {'name':'card3','atk':1,'hp':5},
+                            {'name':'card4','atk':1,'hp':5}];
+    }
+
+    play(){
+        let card = this.#cardList[Math.floor(Math.random()*this.#cardList.length)];
+        let availablePlace = [];
+        for (let i = 0; i < 4; i++) {
+            if (plateau.getCard(i) == undefined) {
+                console.log(i);
+                availablePlace.push(i);
+            }
+            
+        }
+        if (availablePlace.length >0) {
+            let pos = availablePlace[Math.floor(Math.random()*availablePlace.length)];
+            let newCard = new Carte('./images/boo.jpg',1,1,card.name,card.hp,card.atk);
+            plateau.addCard(newCard,pos);
+        }
+        
+    }
+}
 
 /// - Effets - ////////////////////////////////////////////////////////////////
 
@@ -790,5 +879,4 @@ class Vol extends Effet{
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
         return null;
     }
-
 }
