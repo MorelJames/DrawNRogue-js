@@ -139,7 +139,6 @@ window.addEventListener('resize',function(){
 })
 
 class Plateau {
-    
     #cardListJoueur
     #cardListEnemie
     width;
@@ -227,7 +226,7 @@ class Plateau {
             }
 
 
-        for (let i = 0; i < this.#cardListJoueur.length(); i++) {
+        for (let i = 0; i < this.#cardListJoueur.length; i++) {
             if (this.#cardListJoueur[i] != null) {
                 if (this.#cardListJoueur[i].getHp() <= 0) {
                     this.listeEmplacements[i].setFree();
@@ -528,7 +527,7 @@ class Carte{
     tourCarte(listCarteJoueur, listCarteEnemie){
         let intensite;
         let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie);
-        for(let i = 0; i<listCarteImpacter.length(); i++){
+        for(let i = 0; i<listCarteImpacter.length; i++){
             intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
             if(intensite < 0 && listCarteImpacter[i] != null){
                 intensite = this.#effet.soin(this, listCarteImpacter[i], intensite);
@@ -765,7 +764,7 @@ class Effet{
     }
 
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
-        let listCarteReturn = [];
+        let listCarteReturn = new Array(0);
         listCarteReturn.push(listCarteEnemie[pos]);
         return listCarteReturn;
     }
