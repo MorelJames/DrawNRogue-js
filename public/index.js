@@ -35,10 +35,18 @@ let maxHeight;
 window.onload = function () {
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
-    maxWidth = window.innerWidth;
-    maxHeight = window.innerHeight;
-    canvas.width = maxWidth;
-    canvas.height = maxHeight;
+    maxWidth = 1920;
+    maxHeight = 1080;
+    let ratioW =maxWidth/window.innerWidth;
+    let ratioH =  maxHeight/window.innerHeight;
+
+    if (ratioW<ratioH) {
+        canvas.width = maxWidth * 1/ratioH,
+        canvas.height =maxHeight * 1/ratioH;
+    }else{
+        canvas.width = maxWidth * 1/ratioW,
+        canvas.height =maxHeight * 1/ratioW;
+    }
 
     aspectRatio = 16/9;
 
@@ -169,14 +177,14 @@ window.addEventListener('resize',function(e){
     context.clearRect(0,0,canvas.width,canvas.height);
     drawElement.forEach(elem => elem.draw());
     main.refreshPosInfo();
-    if (main.getListeCartes()[0] != undefined){
-        main.reajusterCartes();
-    }
+
+    main.reajusterCartes();
+
 })
 
 class Plateau {
-    #cardListJoueur
-    #cardListEnemie
+    #cardListJoueur;
+    #cardListEnemie;
     width;
     height;
     x;
@@ -230,6 +238,14 @@ class Plateau {
             }
             
         }
+        for (let i = 0; i < this.#cardListEnemie.length; i++) {
+            if (this.#cardListEnemie[i] != undefined) {
+                this.#cardListEnemie[i].setX(this.listeEmplacements[i].getX());
+                this.#cardListEnemie[i].setY(this.listeEmplacements[i].getY());
+            }
+            
+            
+        }
     }
 
     addCard(card, pos, joueur){
@@ -237,6 +253,9 @@ class Plateau {
            this.#cardListJoueur[pos] = card; 
         }
         else{
+            card.setX(this.listeEmplacements[pos].getX());
+            card.setY(this.listeEmplacements[pos].getY());
+            card.setPos(pos);
             this.#cardListEnemie[pos] = card;
         }
     }
@@ -253,22 +272,29 @@ class Plateau {
         endTurn = false;
         canDraw = true;
         canPlay = true;
+        console.log('entré dans action');
         for (let i = 0; i < this.#cardListJoueur.length; i++) {
-            if(this.#cardListJoueur[i] != null){
+            console.log('tour' + i);
+            console.log('j');
+            console.log(this.#cardListJoueur[i]);
+            if(this.#cardListJoueur[i] != undefined){
+                console.log('va dans tourCarte');
                 this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie);
             }
-            if(this.#cardListEnemie[i] != null){
+            console.log('e');
+            console.log(this.#cardListEnemie[i]);
+            if(this.#cardListEnemie[i] != undefined){
                 this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur);
             }
 
 
         for (let i = 0; i < this.#cardListJoueur.length; i++) {
-            if (this.#cardListJoueur[i] != null) {
+            if (this.#cardListJoueur[i] != undefined) {
                 if (this.#cardListJoueur[i].getHp() <= 0) {
                     this.listeEmplacements[i].setFree();
                     this.#cardListJoueur[i] = undefined;
                 }
-            if(this.#cardListEnemie[i] != null)
+            if(this.#cardListEnemie[i] != undefined)
                 if (this.#cardListEnemie[i].getHp() <= 0) {
                     this.listeEmplacements[i].setFree();
                     this.#cardListEnemie[i] = undefined;
@@ -391,7 +417,8 @@ class Emplacement{
         if (!this.#isFull && selectedCard != undefined && this.#pos >3 && canPlay) {
             this.#placedCart = selectedCard;
             selectedCard.setPlayed();
-            plateau.addCard(selectedCard, this.#pos);
+            plateau.addCard(selectedCard, this.#pos-4, true);
+            selectedCard.setPos(this.#pos-4);
             this.#isFull = true;
             main.retirerCarte(selectedCard);
             selectedCard = undefined;
@@ -414,9 +441,11 @@ class Carte{
     #hpmax;
     #atk;
     #isPlayed;
-    #effet
+    #effet;
+    #pos;
+    #PlayerCard;
 
-    constructor(imgSrc,x,y,nom,hp,atk) {
+    constructor(imgSrc,x,y,nom,hp,atk,playerCard) {
         this.#img = new Image();
         this.#img.src = imgSrc;
         //console.log(this.#img.src);
@@ -434,6 +463,7 @@ class Carte{
         this.#atk = atk;
         this.#isPlayed = false;
         this.#effet = new Effet();
+        this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
         
@@ -544,9 +574,15 @@ class Carte{
     getHeight(){
         return this.#height;
     }
+    getPos(){
+        return this.#pos;
+    }
 
     setDamage(damage){
         this.#hp -= damage;
+    }
+    setPos(pos){
+        this.#pos = pos;
     }
     getAtk(){
         return this.#atk;
@@ -558,10 +594,20 @@ class Carte{
     getHpmax(){
         return this.#hpmax
     }
+    isPlayerCard(){
+        return this.#PlayerCard;
+    }
 
     tourCarte(listCarteJoueur, listCarteEnemie){
+        console.log('est dans tourCarte');
+        console.log('liste J');
+        console.log(listCarteJoueur);
+        console.log('liste e');
+        console.log(listCarteEnemie);
         let intensite;
-        let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie);
+        let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie, this.#pos);
+        console.log('liste carte impacté');
+        console.log(listCarteImpacter);
         for(let i = 0; i<listCarteImpacter.length; i++){
             intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
             if(intensite < 0 && listCarteImpacter[i] != null){
@@ -581,8 +627,12 @@ class Carte{
 
     attaque(carteImpacter, intensite){
         if (carteImpacter != null){
-            carteImpacter.setHp(Math.max(0, hp-intensite));
+            carteImpacter.setHp(Math.max(0, carteImpacter.getHp()-intensite));
             if(carteImpacter.getHp() == 0){
+                if (carteImpacter.isPlayerCard()) {
+                    plateau.listeEmplacements[carteImpacter.getPos()+4].setFree();
+                }
+                
                 //TODO déclancher mort carte
             }
         }
@@ -628,19 +678,22 @@ class Main{
 
     reajusterCartes(){
         this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
-        let carte = this.#listeCartes[0];
-        let nouvCarte;
-        carte.setX(this.#cardPos);
-        carte.setY(this.#y);
+        if (this.#listeCartes[0]!=undefined) {
+            let carte = this.#listeCartes[0];
+            let nouvCarte;
+            carte.setX(this.#cardPos);
+            carte.setY(this.#y);
 
-        let i;
-        for (i = 1; i<this.#listeCartes.length; i++) {
-            carte = this.#listeCartes[i-1];
-            nouvCarte = this.#listeCartes[i];
-            carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
-            nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
-            nouvCarte.setY(this.#y);
+            let i;
+            for (i = 1; i<this.#listeCartes.length; i++) {
+                carte = this.#listeCartes[i-1];
+                nouvCarte = this.#listeCartes[i];
+                carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+                nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
+                nouvCarte.setY(this.#y);
+            }
         }
+        
     }
 
     getListeCartes()
@@ -743,7 +796,7 @@ class Pioche{
 
     mouseClick(){
         if (main.getListeCartes().length < 5 && canDraw) {
-            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv',5,1);
+            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv',5,1,true);
             main.ajoutCarte(carte);
             canDraw = false;
         }
@@ -853,6 +906,9 @@ class Effet{
     }
 
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
+        console.log('est dans carteImpacter');
+        console.log(pos);
+        console.log(listCarteEnemie[pos]);
         let listCarteReturn = new Array(0);
         listCarteReturn.push(listCarteEnemie[pos]);
         return listCarteReturn;
