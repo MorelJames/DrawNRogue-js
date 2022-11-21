@@ -28,12 +28,17 @@ let canPlay;
 
 let aspectRatio;
 
+let maxWidth;
+let maxHeight;
+
 
 window.onload = function () {
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
-    canvas.width = 1920;
-    canvas.height = 1080;
+    maxWidth = window.innerWidth;
+    maxHeight = window.innerHeight;
+    canvas.width = maxWidth;
+    canvas.height = maxHeight;
 
     aspectRatio = 16/9;
 
@@ -137,10 +142,26 @@ function drawAll(timeStamp){
     requestAnimationFrame(drawAll);
 }
 
-window.addEventListener('resize',function(){
-    console.log('RATIO = ' + aspectRatio);
-    //canvas.width = window.innerWidth;
-    //canvas.height = 3*canvas.width/4;
+window.addEventListener('resize',function(e){
+    let ratioW =maxWidth/window.innerWidth;
+    let ratioH =  maxHeight/window.innerHeight;
+
+    if (ratioW<ratioH) {
+        canvas.width = maxWidth * 1/ratioH,
+        canvas.height =maxHeight * 1/ratioH;
+    }else{
+        canvas.width = maxWidth * 1/ratioW,
+        canvas.height =maxHeight * 1/ratioW;
+    }
+    console.log('win');
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+
+     
+    console.log('can');
+    console.log(canvas.width);
+    
+    console.log(canvas.height);
     
     context.lineWidth = canvas.width/100;
     cardWidth = canvas.width/8*0.8;
