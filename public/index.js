@@ -139,7 +139,8 @@ window.addEventListener('resize',function(){
 })
 
 class Plateau {
-    #cardList;
+    #cardListJoueur
+    #cardListEnemie
     width;
     height;
     x;
@@ -165,7 +166,8 @@ class Plateau {
             }
             tmpY+=this.height/2;
         }
-        this.#cardList = new Array(8);
+        this.#cardListEnemie = new Array(4);
+        this.#cardListJoueur = new Array(4);
     }
 
     draw(){
@@ -194,51 +196,46 @@ class Plateau {
         }
     }
 
-    addCard(card, pos){
-        this.#cardList[pos] = card;
+    addCard(card, pos, joueur){
+        if(joueur){
+           this.#cardListJoueur[pos] = card; 
+        }
+        else{
+            this.#cardListEnemie[pos] = card;
+        }
     }
-    getCard(pos){
-        return this.#cardList[pos];
+    getCard(pos, joueur){
+        if(joueur){
+            return this.#cardListJoueur[pos]; 
+         }
+         else{
+            return this.#cardListEnemie[pos];
+         }
     }
 
     action(){
         endTurn = false;
         canDraw = true;
         canPlay = true;
-        for (let i = 0; i < this.#cardList.length; i++) {
-            if (i<4) {
-                if (this.#cardList[i] == undefined) {
-                    
-                }
-                else{
-                    if (this.#cardList[i+4] != undefined) {
-                        console.log('a');
-                        this.#cardList[i+4].setDamage(this.#cardList[i].getAtk());
-                    }
-                    console.log(this.#cardList[i].getX());
-                }
-                
+        for (let i = 0; i < this.#cardListJoueur.length; i++) {
+            if(this.#cardListJoueur[i] != null){
+                this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie);
             }
-            else{
-                if (this.#cardList[i] == undefined) {
-                    
-                }
-                else{
-                    if (this.#cardList[i-4] != undefined) {
-                        this.#cardList[i-4].setDamage(this.#cardList[i].getAtk());
-                    }
-                    console.log(this.#cardList[i].getX());
-                }
-                
+            if(this.#cardListEnemie[i] != null){
+                this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur);
             }
-            
-        }
-        for (let i = 0; i < this.#cardList.length; i++) {
-            if (this.#cardList[i] != undefined) {
-                if (this.#cardList[i].getHp() <= 0) {
+
+
+        for (let i = 0; i < this.#cardListJoueur.length; i++) {
+            if (this.#cardListJoueur[i] != null) {
+                if (this.#cardListJoueur[i].getHp() <= 0) {
                     this.listeEmplacements[i].setFree();
-                    this.#cardList[i] = undefined;
-                    
+                    this.#cardListJoueur[i] = undefined;
+                }
+            if(this.#cardListEnemie[i] != null)
+                if (this.#cardListEnemie[i].getHp() <= 0) {
+                    this.listeEmplacements[i].setFree();
+                    this.#cardListEnemie[i] = undefined;
                 }
             }
             
@@ -263,8 +260,7 @@ class Plateau {
             
         }
         requestAnimationFrame(this.animate.bind(this));
-    }*/
-    
+    }*/}
 }
 
 class Emplacement{
@@ -377,8 +373,10 @@ class Carte{
     #nom;
     #isMouseHover;
     #hp;
+    #hpmax;
     #atk;
     #isPlayed;
+    #effet
 
     constructor(imgSrc,x,y,nom,hp,atk) {
         this.#img = new Image();
@@ -394,8 +392,10 @@ class Carte{
         this.#nom = nom;
         this.#isMouseHover = false;
         this.#hp = hp;
+        this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
+        this.#effet = new Effet();
         drawElement.push(this);
         elements.push(this);
         
@@ -493,6 +493,10 @@ class Carte{
         this.#isPlayed = true;
     }
 
+    setHp(hp){
+        this.#hp = hp;
+    }
+
     getX(){
         return this.#x;
     }
@@ -515,6 +519,47 @@ class Carte{
     getHp(){
         return this.#hp;
     }
+
+    getHpmax(){
+        return this.#hpmax
+    }
+
+    tourCarte(listCarteJoueur, listCarteEnemie){
+        let intensite;
+        let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie);
+        for(let i = 0; i<listCarteImpacter.length; i++){
+            intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
+            if(intensite < 0 && listCarteImpacter[i] != null){
+                intensite = this.#effet.soin(this, listCarteImpacter[i], intensite);
+                this.soin(listCarteImpacter[1], intensite)
+            }
+            else{
+                if(listCarteImpacter[i] != null) intensite = listCarteImpacter[i].#effet.defence(listCarteImpacter[i], this, intensite);
+                this.attaque(listCarteImpacter[i], intensite, listCarteJoueur)
+            }
+        }
+    }
+    soin(carteImpacter, intensite)
+    {
+        carteImpacter.setHp(Math.min(carteImpacter.getHpmax(), hp+intensite));
+    }
+
+    attaque(carteImpacter, intensite){
+        if (carteImpacter != null){
+            carteImpacter.setHp(Math.max(0, hp-intensite));
+            if(carteImpacter.getHp() == 0){
+                //TODO déclancher mort carte
+            }
+        }
+        else{
+            //TODO modifier jauge plateau
+        }
+        
+    }
+
+
+
+
 }
 
 class Main{
@@ -706,4 +751,44 @@ class EndTurnButton{
     getHeight(){
         return this.#height;
     }
+}
+
+
+/// - Effets - ////////////////////////////////////////////////////////////////
+
+class Effet{
+    nomEffet;
+    imgEffet;
+    constructor(){
+        this.nomEffet = "Effet par défaut";
+    }
+
+    getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
+        let listCarteReturn = new Array(0);
+        listCarteReturn.push(listCarteEnemie[pos]);
+        return listCarteReturn;
+    }
+
+    actionCarte(carteJoueur, carteImpacter){
+        return carteJoueur.getAtk();
+    }
+
+    defence(carteJoueur, carteImpacter, intensite){
+        return intensite;
+    }
+
+    soin(carteJoueur, carteImpacter, intensite){
+        return intensite;
+    }
+}
+
+
+class Vol extends Effet{
+    constructor(){
+        this.nomEffet = "vol"
+    }
+    getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
+        return null;
+    }
+
 }
