@@ -4,13 +4,13 @@ let palteau;
 let rect;
 let offSetX;
 let offSetY;
-let elements =[]; //tableau contenant les elements qui peuvent être cliqué à la souris
+let elements = []; //tableau contenant les elements qui peuvent être cliqué à la souris
 
-let drawElement =[]; // tableau contenant les elements à dessiner sur le canvas
+let drawElement = []; // tableau contenant les elements à dessiner sur le canvas
 
-let interval = 1000/60; // defini le nombre d'image par seconde du jeu
+let interval = 1000 / 60; // defini le nombre d'image par seconde du jeu
 let timer = 0;
-let lastTime =0;
+let lastTime = 0;
 
 let plateau;
 let lineWidth;
@@ -37,45 +37,45 @@ window.onload = function () {
     context = canvas.getContext('2d');
     maxWidth = 1920;
     maxHeight = 1080;
-    let ratioW =maxWidth/window.innerWidth;
-    let ratioH =  maxHeight/window.innerHeight;
+    let ratioW = maxWidth / window.innerWidth;
+    let ratioH = maxHeight / window.innerHeight;
 
-    if (ratioW<ratioH) {
-        canvas.width = maxWidth * 1/ratioH,
-        canvas.height =maxHeight * 1/ratioH;
-    }else{
-        canvas.width = maxWidth * 1/ratioW,
-        canvas.height =maxHeight * 1/ratioW;
+    if (ratioW < ratioH) {
+        canvas.width = maxWidth * 1 / ratioH,
+            canvas.height = maxHeight * 1 / ratioH;
+    } else {
+        canvas.width = maxWidth * 1 / ratioW,
+            canvas.height = maxHeight * 1 / ratioW;
     }
 
-    aspectRatio = 16/9;
+    aspectRatio = 16 / 9;
 
     rect = canvas.getBoundingClientRect();
     offSetX = canvas.width / rect.width,
-    offSetY = canvas.height / rect.height;
+        offSetY = canvas.height / rect.height;
 
 
 
-    canvas.addEventListener('mousemove', (event) =>{
+    canvas.addEventListener('mousemove', (event) => {
         //console.log(event);
         let x = (event.x - rect.left) * offSetX;
-        let y = (event. y - rect.top) * offSetY;
-        elements.forEach(elem => elem.mouseHover(x,y));
+        let y = (event.y - rect.top) * offSetY;
+        elements.forEach(elem => elem.mouseHover(x, y));
     })
 
 
 
-    canvas.addEventListener('click', (event) =>{
+    canvas.addEventListener('click', (event) => {
         let x = (event.x - rect.left) * offSetX;
-        let y = (event. y - rect.top) * offSetY;
+        let y = (event.y - rect.top) * offSetY;
         let clicked = false;
-        let i =0;
+        let i = 0;
         while (i < elements.length && !clicked) {
             let xElem = elements[i].getX();
             let yElem = elements[i].getY();
             let widthElem = elements[i].getWidth();
             let heightElem = elements[i].getHeight();
-            if (x > xElem && x< xElem+ widthElem && y > yElem && y < yElem + heightElem) {
+            if (x > xElem && x < xElem + widthElem && y > yElem && y < yElem + heightElem) {
                 elements[i].mouseClick();
                 clicked = true;
             }
@@ -93,10 +93,10 @@ window.onload = function () {
         });*/
     })
 
-    context.lineWidth = canvas.width/100;
+    context.lineWidth = canvas.width / 100;
 
-    cardWidth = canvas.width/8*0.8;
-    cardHeight = canvas.height/4*0.8;
+    cardWidth = canvas.width / 8 * 0.8;
+    cardHeight = canvas.height / 4 * 0.8;
 
     endTurn = false;
 
@@ -115,7 +115,7 @@ window.onload = function () {
     pioche = new Pioche();
 
     endTurnButton = new EndTurnButton();
-    
+
 
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
@@ -131,50 +131,50 @@ window.onload = function () {
         context.drawImage(img,0,0);
     };
     img.src = './boo.jpg';*/
-    
-    
+
+
 }
 
 
 //cette fonction redessine les elements du canvas
-function drawAll(timeStamp){
+function drawAll(timeStamp) {
     deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
     if (timer > interval) {
-        context.clearRect(0,0,canvas.width,canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         drawElement.forEach(elem => elem.draw())
-        timer =0;
-    }else{
+        timer = 0;
+    } else {
         timer += deltaTime;
     }
     requestAnimationFrame(drawAll);
 }
 
-window.addEventListener('resize',function(e){
-    let ratioW =maxWidth/window.innerWidth;
-    let ratioH =  maxHeight/window.innerHeight;
+window.addEventListener('resize', function (e) {
+    let ratioW = maxWidth / window.innerWidth;
+    let ratioH = maxHeight / window.innerHeight;
 
-    if (ratioW<ratioH) {
-        canvas.width = maxWidth * 1/ratioH,
-        canvas.height =maxHeight * 1/ratioH;
-    }else{
-        canvas.width = maxWidth * 1/ratioW,
-        canvas.height =maxHeight * 1/ratioW;
+    if (ratioW < ratioH) {
+        canvas.width = maxWidth * 1 / ratioH,
+            canvas.height = maxHeight * 1 / ratioH;
+    } else {
+        canvas.width = maxWidth * 1 / ratioW,
+            canvas.height = maxHeight * 1 / ratioW;
     }
     console.log('win');
     console.log(window.innerWidth);
     console.log(window.innerHeight);
 
-     
+
     console.log('can');
     console.log(canvas.width);
-    
+
     console.log(canvas.height);
-    
-    context.lineWidth = canvas.width/100;
-    cardWidth = canvas.width/8*0.8;
-    cardHeight = canvas.height/4*0.8;
-    context.clearRect(0,0,canvas.width,canvas.height);
+
+    context.lineWidth = canvas.width / 100;
+    cardWidth = canvas.width / 8 * 0.8;
+    cardHeight = canvas.height / 4 * 0.8;
+    context.clearRect(0, 0, canvas.width, canvas.height);
     drawElement.forEach(elem => elem.draw());
     main.refreshPosInfo();
 
@@ -185,90 +185,91 @@ window.addEventListener('resize',function(e){
 class Plateau {
     #cardListJoueur;
     #cardListEnemie;
+    pvJauge;
     width;
     height;
     x;
     y;
     listeEmplacements = [];
-    constructor(){
-        this.width = canvas.width/2;
-        this.height = canvas.height/2;
-        this.x = canvas.width/4;
-        this.y = canvas.height/7;
+    constructor() {
+        this.width = canvas.width / 2;
+        this.height = canvas.height / 2;
+        this.x = canvas.width / 4;
+        this.y = canvas.height / 7;
         //this.#draw();
-
+        this.pvJauge = 5;
         let tmpY = this.y;
         let emplacementPos = 0;
         for (let i = 0; i < 2; i++) {
             let tmpX = this.x;
             for (let index = 0; index < 4; index++) {
-                let emplacement = new Emplacement(tmpX,tmpY, cardWidth, cardHeight, emplacementPos);
+                let emplacement = new Emplacement(tmpX, tmpY, cardWidth, cardHeight, emplacementPos);
                 elements.push(emplacement);
                 this.listeEmplacements.push(emplacement);
                 emplacementPos++;
-                tmpX+=this.width/4;
+                tmpX += this.width / 4;
             }
-            tmpY+=this.height/2;
+            tmpY += this.height / 2;
         }
         this.#cardListEnemie = new Array(4);
         this.#cardListJoueur = new Array(4);
     }
 
-    draw(){
+    draw() {
         context.fillStyle = 'brown';
 
-        this.width = canvas.width/2;
-        this.height = canvas.height/2;
-        this.x = canvas.width/4;
-        this.y = canvas.height/7;
+        this.width = canvas.width / 2;
+        this.height = canvas.height / 2;
+        this.x = canvas.width / 4;
+        this.y = canvas.height / 7;
 
         //console.log(this.width);
         context.fillRect(this.x, this.y, this.width, this.height);
 
 
-        let xtmp = this.x + this.width/4*0.1;
-        let ytmp = this.y+this.height/2*0.1;
+        let xtmp = this.x + this.width / 4 * 0.1;
+        let ytmp = this.y + this.height / 2 * 0.1;
         for (let i = 0; i < 8; i++) {
-            
-            this.listeEmplacements[i].draw(xtmp,ytmp,this.width/4*0.8,this.height/2*0.8);
-            xtmp+=this.width/4;
-            if (i===3) {
-                xtmp = this.x + this.width/4*0.1;
-                ytmp += this.height/2;
+
+            this.listeEmplacements[i].draw(xtmp, ytmp, this.width / 4 * 0.8, this.height / 2 * 0.8);
+            xtmp += this.width / 4;
+            if (i === 3) {
+                xtmp = this.x + this.width / 4 * 0.1;
+                ytmp += this.height / 2;
             }
-            
+
         }
         for (let i = 0; i < this.#cardListEnemie.length; i++) {
             if (this.#cardListEnemie[i] != undefined) {
                 this.#cardListEnemie[i].setX(this.listeEmplacements[i].getX());
                 this.#cardListEnemie[i].setY(this.listeEmplacements[i].getY());
             }
-            
-            
+
+
         }
     }
 
-    addCard(card, pos, joueur){
-        if(joueur){
-           this.#cardListJoueur[pos] = card; 
+    addCard(card, pos, joueur) {
+        if (joueur) {
+            this.#cardListJoueur[pos] = card;
         }
-        else{
+        else {
             card.setX(this.listeEmplacements[pos].getX());
             card.setY(this.listeEmplacements[pos].getY());
             card.setPos(pos);
             this.#cardListEnemie[pos] = card;
         }
     }
-    getCard(pos, joueur){
-        if(joueur){
-            return this.#cardListJoueur[pos]; 
-         }
-         else{
+    getCard(pos, joueur) {
+        if (joueur) {
+            return this.#cardListJoueur[pos];
+        }
+        else {
             return this.#cardListEnemie[pos];
-         }
+        }
     }
 
-    action(){
+    action() {
         endTurn = false;
         canDraw = true;
         canPlay = true;
@@ -277,34 +278,36 @@ class Plateau {
             console.log('tour' + i);
             console.log('j');
             console.log(this.#cardListJoueur[i]);
-            if(this.#cardListJoueur[i] != undefined){
+            if (this.#cardListJoueur[i] != undefined) {
                 console.log('va dans tourCarte');
-                this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie);
+                this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
             }
             console.log('e');
             console.log(this.#cardListEnemie[i]);
-            if(this.#cardListEnemie[i] != undefined){
-                this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur);
+            if (this.#cardListEnemie[i] != undefined) {
+                this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur, false);
             }
 
 
-        for (let i = 0; i < this.#cardListJoueur.length; i++) {
-            if (this.#cardListJoueur[i] != undefined) {
-                if (this.#cardListJoueur[i].getHp() <= 0) {
-                    this.listeEmplacements[i].setFree();
-                    this.#cardListJoueur[i] = undefined;
+            for (let i = 0; i < this.#cardListJoueur.length; i++) {
+                if (this.#cardListJoueur[i] != undefined) {
+                    if (this.#cardListJoueur[i].getHp() <= 0) {
+                        this.listeEmplacements[i].setFree();
+                        this.#cardListJoueur[i] = undefined;
+                    }
+                    if (this.#cardListEnemie[i] != undefined)
+                        if (this.#cardListEnemie[i].getHp() <= 0) {
+                            this.listeEmplacements[i].setFree();
+                            this.#cardListEnemie[i] = undefined;
+                        }
                 }
-            if(this.#cardListEnemie[i] != undefined)
-                if (this.#cardListEnemie[i].getHp() <= 0) {
-                    this.listeEmplacements[i].setFree();
-                    this.#cardListEnemie[i] = undefined;
-                }
+
             }
-            
+
         }
-        console.log(canPlay);
-    }
-
+        if(this.pvJauge > 10 || this.pvJauge){
+            console.log("partie finie");
+        }
     /*animate(){
         this.width = canvas.width/2;
         this.height = canvas.height/2;
@@ -324,9 +327,10 @@ class Plateau {
         }
         requestAnimationFrame(this.animate.bind(this));
     }*/}
+
 }
 
-class Emplacement{
+class Emplacement {
     #x;
     #y;
     #width;
@@ -337,7 +341,7 @@ class Emplacement{
     #pos;
     #placedCart;
 
-    constructor(x,y,width,height,pos){
+    constructor(x, y, width, height, pos) {
         this.#x = x;
         this.#y = y;
         this.#width = width;
@@ -349,14 +353,14 @@ class Emplacement{
         //this.#draw();
     }
 
-    draw(x,y,width,height){
-        this.#x=x;
+    draw(x, y, width, height) {
+        this.#x = x;
         this.#y = y;
         this.#width = width;
         this.#height = height;
-        if (this.#isMouseHover && !this.#isFull && this.#pos >3) {
+        if (this.#isMouseHover && !this.#isFull && this.#pos > 3) {
             this.#color = 'yellow';
-        }else{
+        } else {
             this.#color = 'white';
         }
 
@@ -376,49 +380,49 @@ class Emplacement{
         this.#draw();
         //requestAnimationFrame(this.animate.bind(this));
     }*/
-    getX(){
+    getX() {
         return this.#x;
     }
-    getY(){
+    getY() {
         return this.#y;
     }
-    setX(x){
+    setX(x) {
         this.#x = x;
     }
-    setY(y){
+    setY(y) {
         this.#y = y;
     }
-    setColor(color){
+    setColor(color) {
         this.#color = color;
     }
-    setFree(){
+    setFree() {
         this.#isFull = false;
-        
+
     }
-    getWidth(){
+    getWidth() {
         return this.#width;
     }
-    getHeight(){
+    getHeight() {
         return this.#height;
     }
 
-    mouseHover(x,y){
+    mouseHover(x, y) {
         if (!this.#isFull) {
-            if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
+            if (x > this.#x && x < this.#x + this.#width && y > this.#y && y < this.#y + this.#height) {
                 this.#isMouseHover = true;
                 //console.log(selectedCard);
-            }else{
+            } else {
                 this.#isMouseHover = false;
             }
-        }  
+        }
     }
 
-    mouseClick(){
-        if (!this.#isFull && selectedCard != undefined && this.#pos >3 && canPlay) {
+    mouseClick() {
+        if (!this.#isFull && selectedCard != undefined && this.#pos > 3 && canPlay) {
             this.#placedCart = selectedCard;
             selectedCard.setPlayed();
-            plateau.addCard(selectedCard, this.#pos-4, true);
-            selectedCard.setPos(this.#pos-4);
+            plateau.addCard(selectedCard, this.#pos - 4, true);
+            selectedCard.setPos(this.#pos - 4);
             this.#isFull = true;
             main.retirerCarte(selectedCard);
             selectedCard = undefined;
@@ -426,10 +430,10 @@ class Emplacement{
             console.log("test");
         }
     }
-    
+
 }
 
-class Carte{
+class Carte {
     #img;
     #x;
     #y;
@@ -445,7 +449,7 @@ class Carte{
     #pos;
     #PlayerCard;
 
-    constructor(imgSrc,x,y,nom,hp,atk,playerCard) {
+    constructor(imgSrc, x, y, nom, hp, atk, playerCard) {
         this.#img = new Image();
         this.#img.src = imgSrc;
         //console.log(this.#img.src);
@@ -466,37 +470,37 @@ class Carte{
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
-        
+
     }
 
-    draw(){
+    draw() {
         if (this.#hp <= 0) {
             let i = drawElement.indexOf(this);
-            if (i >-1) {
-                drawElement.splice(i,1);
+            if (i > -1) {
+                drawElement.splice(i, 1);
             }
-            
-            
+
+
         }
-        
+
         //console.log(this.#x);
         //console.log(this.#y);
         if (!this.#isMouseHover) {
             this.#width = cardWidth;
             this.#height = cardHeight;
         }
-        
+
 
         context.fillStyle = 'green';
-        context.fillRect(this.#x,this.#y,this.#width,this.#height);
+        context.fillRect(this.#x, this.#y, this.#width, this.#height);
         context.fillStyle = 'black';
         context.textAlign = 'center';
-        context.font = canvas.width/100;
-        context.fillText(this.#nom,this.#x+this.#width/2,this.#y+this.#height/8);
-        context.drawImage(this.#img,this.#x,this.#y+this.#height/4,this.#width,this.#height/3);
+        context.font = canvas.width / 100;
+        context.fillText(this.#nom, this.#x + this.#width / 2, this.#y + this.#height / 8);
+        context.drawImage(this.#img, this.#x, this.#y + this.#height / 4, this.#width, this.#height / 3);
 
-        context.fillText(this.#hp+'hp',this.#x+this.#width/5.5,this.#y+this.#height/1.4);
-        context.fillText(this.#atk+'atk',this.#x+this.#width/1.2,this.#y+this.#height/1.05);
+        context.fillText(this.#hp + 'hp', this.#x + this.#width / 5.5, this.#y + this.#height / 1.4);
+        context.fillText(this.#atk + 'atk', this.#x + this.#width / 1.2, this.#y + this.#height / 1.05);
 
         /*this.#img.onload = ()=>{
             console.log(this.#x);
@@ -510,22 +514,22 @@ class Carte{
         requestAnimationFrame(this.animate.bind(this))
     }*/
 
-    mouseHover(x,y){
+    mouseHover(x, y) {
         if (!this.#isPlayed) {
-            if (x > this.#x && x<this.#x+this.#width && y > this.#y && y < this.#y+this.#height) {
+            if (x > this.#x && x < this.#x + this.#width && y > this.#y && y < this.#y + this.#height) {
                 if (!this.#isMouseHover) {
-                    this.#width = cardWidth*1.05;
-                    this.#height = cardHeight*1.05;
+                    this.#width = cardWidth * 1.05;
+                    this.#height = cardHeight * 1.05;
                 }
                 this.#isMouseHover = true;
-            }else{
+            } else {
                 this.#isMouseHover = false;
             }
         }
-        
+
     }
 
-    mouseClick(){
+    mouseClick() {
         console.log(this.#nom);
         console.log(!this.#isPlayed);
         if (!this.#isPlayed) {
@@ -533,72 +537,72 @@ class Carte{
         }
     }
 
-    getX(){
+    getX() {
         return this.#x;
     }
 
-    getY(){
+    getY() {
         return this.#y;
     }
 
-    setX(x){
+    setX(x) {
         this.#x = x;
     }
-    setY(y){
+    setY(y) {
         this.#y = y;
     }
-    setWidth(width){
+    setWidth(width) {
         this.#width = width;
     }
-    setHeight(height){
+    setHeight(height) {
         this.#height = height;
     }
-    setPlayed(){
+    setPlayed() {
         console.log('set played');
         this.#isPlayed = true;
     }
 
-    setHp(hp){
+    setHp(hp) {
         this.#hp = hp;
     }
 
-    getX(){
+    getX() {
         return this.#x;
     }
-    getY(){
+    getY() {
         return this.#y;
     }
-    getWidth(){
+    getWidth() {
         return this.#width;
     }
-    getHeight(){
+    getHeight() {
         return this.#height;
     }
-    getPos(){
+    getPos() {
         return this.#pos;
     }
 
-    setDamage(damage){
+    setDamage(damage) {
         this.#hp -= damage;
     }
-    setPos(pos){
+    setPos(pos) {
         this.#pos = pos;
     }
-    getAtk(){
+    getAtk() {
         return this.#atk;
     }
-    getHp(){
+    getHp() {
         return this.#hp;
     }
 
-    getHpmax(){
+    getHpmax() {
         return this.#hpmax
     }
-    isPlayerCard(){
+    isPlayerCard() {
         return this.#PlayerCard;
     }
 
-    tourCarte(listCarteJoueur, listCarteEnemie){
+    tourCarte(listCarteJoueur, listCarteEnemie, joueur) {
         console.log('est dans tourCarte');
         console.log('liste J');
         console.log(listCarteJoueur);
@@ -608,38 +612,36 @@ class Carte{
         let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie, this.#pos);
         console.log('liste carte impacté');
         console.log(listCarteImpacter);
-        for(let i = 0; i<listCarteImpacter.length; i++){
+        for (let i = 0; i < listCarteImpacter.length; i++) {
             intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
-            if(intensite < 0 && listCarteImpacter[i] != null){
+            if (intensite < 0 && listCarteImpacter[i] != null) {
                 intensite = this.#effet.soin(this, listCarteImpacter[i], intensite);
                 this.soin(listCarteImpacter[1], intensite)
             }
-            else{
-                if(listCarteImpacter[i] != null) intensite = listCarteImpacter[i].#effet.defence(listCarteImpacter[i], this, intensite);
-                this.attaque(listCarteImpacter[i], intensite, listCarteJoueur)
+            else {
+                if (listCarteImpacter[i] != null) intensite = listCarteImpacter[i].#effet.defence(listCarteImpacter[i], this, intensite);
+                this.attaque(listCarteImpacter[i], intensite, joueur)
             }
         }
     }
-    soin(carteImpacter, intensite)
-    {
-        carteImpacter.setHp(Math.min(carteImpacter.getHpmax(), hp+intensite));
+    soin(carteImpacter, intensite) {
+        carteImpacter.setHp(Math.min(carteImpacter.getHpmax(), hp + intensite));
     }
 
-    attaque(carteImpacter, intensite){
-        if (carteImpacter != null){
-            carteImpacter.setHp(Math.max(0, carteImpacter.getHp()-intensite));
-            if(carteImpacter.getHp() == 0){
+    attaque(carteImpacter, intensite, joueur) {
+        if (carteImpacter != null) {
+            carteImpacter.setHp(Math.max(0, carteImpacter.getHp() - intensite));
+            if (carteImpacter.getHp() == 0) {
                 if (carteImpacter.isPlayerCard()) {
-                    plateau.listeEmplacements[carteImpacter.getPos()+4].setFree();
+                    plateau.listeEmplacements[carteImpacter.getPos() + 4].setFree();
                 }
-                
-                //TODO déclancher mort carte
             }
         }
-        else{
-            //TODO modifier jauge plateau
+        else {
+            if (joueur) plateau.pvJauge += intensite;
+            else plateau.pvJauge -= intensite;
         }
-        
+
     }
 
 
@@ -647,7 +649,7 @@ class Carte{
 
 }
 
-class Main{
+class Main {
     #x;
     #y;
     #width;
@@ -656,78 +658,75 @@ class Main{
     #cardGap;
     #cardPos;
 
-    constructor(){
-        this.#x = canvas.width/4;
-        this.#y = canvas.height/1.3;
-        this.#width = canvas.width/2;
+    constructor() {
+        this.#x = canvas.width / 4;
+        this.#y = canvas.height / 1.3;
+        this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
-        this.#listeCartes = []; 
-        this.#cardGap = canvas.width/8*0.2;
-        this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
+        this.#listeCartes = [];
+        this.#cardGap = canvas.width / 8 * 0.2;
+        this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
     }
 
-    draw(){
-        this.#x = canvas.width/4;
-        this.#y = canvas.height/1.3;
-        this.#width = canvas.width/2;
+    draw() {
+        this.#x = canvas.width / 4;
+        this.#y = canvas.height / 1.3;
+        this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
         context.fillStyle = 'gray';
-        context.fillRect(this.#x,this.#y, this.#width,this.#height);
+        context.fillRect(this.#x, this.#y, this.#width, this.#height);
 
     }
 
-    reajusterCartes(){
-        this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
-        if (this.#listeCartes[0]!=undefined) {
+    reajusterCartes() {
+        this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
+        if (this.#listeCartes[0] != undefined) {
             let carte = this.#listeCartes[0];
             let nouvCarte;
             carte.setX(this.#cardPos);
             carte.setY(this.#y);
 
             let i;
-            for (i = 1; i<this.#listeCartes.length; i++) {
-                carte = this.#listeCartes[i-1];
+            for (i = 1; i < this.#listeCartes.length; i++) {
+                carte = this.#listeCartes[i - 1];
                 nouvCarte = this.#listeCartes[i];
-                carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+                carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
                 nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
                 nouvCarte.setY(this.#y);
             }
         }
-        
+
     }
 
-    getListeCartes()
-    {
+    getListeCartes() {
         return this.#listeCartes;
     }
 
-    retirerCarte(carte)
-    {
+    retirerCarte(carte) {
         var carteTrouvee = false;
-        for(var i = 0; i < this.#listeCartes.length; i++){ 
+        for (var i = 0; i < this.#listeCartes.length; i++) {
             if (carteTrouvee == false) {
-                this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth/2 + this.#cardGap/2));
+                this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2));
             }
             else {
-                this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth/2 + this.#cardGap/2));
+                this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
-            if ( this.#listeCartes[i] == carte) { 
+            if (this.#listeCartes[i] == carte) {
                 console.log(this.#listeCartes);
                 carteTrouvee = true;
-                this.#listeCartes.splice(i, 1); 
-                console.log( this.#listeCartes);
+                this.#listeCartes.splice(i, 1);
+                console.log(this.#listeCartes);
                 i--;
             }
         }
 
         let j = elements.indexOf(carte);
-        if (j>-1) {
-            elements.splice(j,1);
+        if (j > -1) {
+            elements.splice(j, 1);
         }
     }
 
-    ajoutCarte(nouvCarte)
-    {
+    ajoutCarte(nouvCarte) {
         if (this.#listeCartes.length == 0) {
             //console.log("feur");
             nouvCarte.setX(this.#cardPos);
@@ -736,176 +735,175 @@ class Main{
             this.#listeCartes.push(nouvCarte);
         }
         else {
-            for (let i = 0; i < this.#listeCartes.length; i++)
-            {
+            for (let i = 0; i < this.#listeCartes.length; i++) {
                 let carte = this.#listeCartes[i];
                 //console.log(carte);
-                carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+                carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
-            nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX()+ cardWidth + this.#cardGap);
+            nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX() + cardWidth + this.#cardGap);
             nouvCarte.setY(this.#y);
             this.#listeCartes.push(nouvCarte);
         }
     }
 
-    refreshPosInfo(){
+    refreshPosInfo() {
 
     }
 
 }
 
-class Pioche{
+class Pioche {
     #x;
     #y;
     #width;
     #height;
 
-    constructor(){
-        this.#x = canvas.width - canvas.width/4;
-        this.#y = canvas.height/1.3;
-        this.#width = plateau.width/4*0.8;
-        this.#height = plateau.height/2*0.8;
+    constructor() {
+        this.#x = canvas.width - canvas.width / 4;
+        this.#y = canvas.height / 1.3;
+        this.#width = plateau.width / 4 * 0.8;
+        this.#height = plateau.height / 2 * 0.8;
         elements.push(this);
         drawElement.push(this);
     }
 
-    getX() { return this.#x;}
-    getY() { return this.#y;}
-    getWidth() { return this.#width};
-    getHeight() { return this.#height;}
+    getX() { return this.#x; }
+    getY() { return this.#y; }
+    getWidth() { return this.#width };
+    getHeight() { return this.#height; }
 
-    draw(){
-        this.#x = canvas.width - canvas.width/6;
-        this.#y = canvas.height/3;
-        this.#width = plateau.width/4*0.8;
-        this.#height = plateau.height/2*0.8;
+    draw() {
+        this.#x = canvas.width - canvas.width / 6;
+        this.#y = canvas.height / 3;
+        this.#width = plateau.width / 4 * 0.8;
+        this.#height = plateau.height / 2 * 0.8;
 
-        context.fillStyle ='gray';
-        context.fillRect(this.#x,this.#y,this.#width,this.#height);
+        context.fillStyle = 'gray';
+        context.fillRect(this.#x, this.#y, this.#width, this.#height);
         context.fillStyle = 'darkgray';
-        context.fillRect(this.#x,this.#y+this.#height/4,this.#width,this.#height/3);
+        context.fillRect(this.#x, this.#y + this.#height / 4, this.#width, this.#height / 3);
         context.fillStyle = 'black';
         context.textAlign = 'center';
-        context.font = canvas.width/50+'px Arial';
-        context.fillText('PIOCHE',this.#x+this.#width/2,this.#y+this.#height/2.3);
+        context.font = canvas.width / 50 + 'px Arial';
+        context.fillText('PIOCHE', this.#x + this.#width / 2, this.#y + this.#height / 2.3);
     }
 
-    mouseHover(){
+    mouseHover() {
 
     }
 
-    mouseClick(){
+    mouseClick() {
         if (main.getListeCartes().length < 5 && canDraw) {
-            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv',5,1,true);
+            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv', 5, 1, true);
             main.ajoutCarte(carte);
             canDraw = false;
         }
     }
 }
 
-class EndTurnButton{
+class EndTurnButton {
     #x;
     #y;
     #width;
     #height;
 
-    constructor(){
-        this.#x = canvas.width - canvas.width/6;
-        this.#y = canvas.height/1.2;
-        this.#width = canvas.width/8;
-        this.#height = canvas.height/10;
+    constructor() {
+        this.#x = canvas.width - canvas.width / 6;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 8;
+        this.#height = canvas.height / 10;
         drawElement.push(this);
         elements.push(this);
     }
 
-    draw(){
+    draw() {
 
-        this.#x = canvas.width - canvas.width/6;
-        this.#y = canvas.height/1.2;
-        this.#width = canvas.width/8;
-        this.#height = canvas.height/10;
+        this.#x = canvas.width - canvas.width / 6;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 8;
+        this.#height = canvas.height / 10;
 
         context.fillStyle = 'gray';
         context.beginPath();
-        context.moveTo(this.#x,this.#y);
-        context.lineTo(this.#x+this.#width/1.5,this.#y);
-        context.lineTo(this.#x+this.#width,this.#y+this.#height/2);
-        context.lineTo(this.#x+this.#width/1.5,this.#y+this.#height);
-        context.lineTo(this.#x,this.#y+this.#height);
-        context.lineTo(this.#x,this.#y);
+        context.moveTo(this.#x, this.#y);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 2);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+        context.lineTo(this.#x, this.#y + this.#height);
+        context.lineTo(this.#x, this.#y);
         context.closePath();
         context.fill();
-        context.font = canvas.width/65+'px Arial';
+        context.font = canvas.width / 65 + 'px Arial';
         context.fillStyle = 'black';
-        context.fillText('Terminer le tour',this.#x+this.#width/2.2,this.#y+this.#height/1.8);
+        context.fillText('Terminer le tour', this.#x + this.#width / 2.2, this.#y + this.#height / 1.8);
     }
 
-    mouseHover(){
-         
+    mouseHover() {
+
     }
 
-    mouseClick(){
+    mouseClick() {
         endTurn = true;
         ia.play();
         plateau.action();
     }
 
-    getX(){
+    getX() {
         return this.#x;
     }
-    getY(){
+    getY() {
         return this.#y;
     }
 
-    getWidth(){
+    getWidth() {
         return this.#width;
     }
-    getHeight(){
+    getHeight() {
         return this.#height;
     }
 }
 
 
-class Ia{
+class Ia {
     #hp;
     #cardList;
-    constructor(){
+    constructor() {
         this.#hp = 10;
-        this.#cardList =   [{'name':'card1','atk':1,'hp':5},
-                            {'name':'card2','atk':1,'hp':5},
-                            {'name':'card3','atk':1,'hp':5},
-                            {'name':'card4','atk':1,'hp':5}];
+        this.#cardList = [{ 'name': 'card1', 'atk': 1, 'hp': 5 },
+        { 'name': 'card2', 'atk': 1, 'hp': 5 },
+        { 'name': 'card3', 'atk': 1, 'hp': 5 },
+        { 'name': 'card4', 'atk': 1, 'hp': 5 }];
     }
 
-    play(){
-        let card = this.#cardList[Math.floor(Math.random()*this.#cardList.length)];
+    play() {
+        let card = this.#cardList[Math.floor(Math.random() * this.#cardList.length)];
         let availablePlace = [];
         for (let i = 0; i < 4; i++) {
             if (plateau.getCard(i) == undefined) {
                 console.log(i);
                 availablePlace.push(i);
             }
-            
+
         }
-        if (availablePlace.length >0) {
-            let pos = availablePlace[Math.floor(Math.random()*availablePlace.length)];
-            let newCard = new Carte('./images/boo.jpg',1,1,card.name,card.hp,card.atk);
-            plateau.addCard(newCard,pos);
+        if (availablePlace.length > 0) {
+            let pos = availablePlace[Math.floor(Math.random() * availablePlace.length)];
+            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk);
+            plateau.addCard(newCard, pos);
         }
-        
+
     }
 }
 
 /// - Effets - ////////////////////////////////////////////////////////////////
 
-class Effet{
+class Effet {
     nomEffet;
     imgEffet;
-    constructor(){
+    constructor() {
         this.nomEffet = "Effet par défaut";
     }
 
-    getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
+    getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         console.log('est dans carteImpacter');
         console.log(pos);
         console.log(listCarteEnemie[pos]);
@@ -914,25 +912,25 @@ class Effet{
         return listCarteReturn;
     }
 
-    actionCarte(carteJoueur, carteImpacter){
+    actionCarte(carteJoueur, carteImpacter) {
         return carteJoueur.getAtk();
     }
 
-    defence(carteJoueur, carteImpacter, intensite){
+    defence(carteJoueur, carteImpacter, intensite) {
         return intensite;
     }
 
-    soin(carteJoueur, carteImpacter, intensite){
+    soin(carteJoueur, carteImpacter, intensite) {
         return intensite;
     }
 }
 
 
-class Vol extends Effet{
-    constructor(){
+class Vol extends Effet {
+    constructor() {
         this.nomEffet = "vol"
     }
-    getCartImpacter(listCarteJoueur, listCarteEnemie, pos){
+    getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
     }
 }
