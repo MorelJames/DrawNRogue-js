@@ -26,12 +26,16 @@ let endTurn;
 let canDraw;
 let canPlay;
 
+let aspectRatio;
+
 
 window.onload = function () {
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = 1920;
+    canvas.height = 1080;
+
+    aspectRatio = 16/9;
 
     rect = canvas.getBoundingClientRect();
     offSetX = canvas.width / rect.width,
@@ -98,6 +102,7 @@ window.onload = function () {
     pioche = new Pioche();
 
     endTurnButton = new EndTurnButton();
+    
 
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
@@ -133,14 +138,19 @@ function drawAll(timeStamp){
 }
 
 window.addEventListener('resize',function(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    console.log('RATIO = ' + aspectRatio);
+    //canvas.width = window.innerWidth;
+    //canvas.height = 3*canvas.width/4;
+    
     context.lineWidth = canvas.width/100;
     cardWidth = canvas.width/8*0.8;
     cardHeight = canvas.height/4*0.8;
     context.clearRect(0,0,canvas.width,canvas.height);
     drawElement.forEach(elem => elem.draw());
     main.refreshPosInfo();
+    if (main.getListeCartes()[0] != undefined){
+        main.reajusterCartes();
+    }
 })
 
 class Plateau {
@@ -246,11 +256,11 @@ class Plateau {
                 if (this.#cardList[i].getHp() <= 0) {
                     this.listeEmplacements[i].setFree();
                     this.#cardList[i] = undefined;
-                    
                 }
             }
             
         }
+        console.log(canPlay);
     }
 
     /*animate(){
@@ -371,6 +381,7 @@ class Emplacement{
             main.retirerCarte(selectedCard);
             selectedCard = undefined;
             canPlay = false;
+            console.log("test");
         }
     }
     
@@ -415,10 +426,7 @@ class Carte{
             if (i >-1) {
                 drawElement.splice(i,1);
             }
-            i = elements.indexOf(this);
-            if (i>-1) {
-                elements.splice(i);
-            }
+            
             
         }
         
@@ -551,6 +559,24 @@ class Main{
         this.#height = canvas.height - this.#y;
         context.fillStyle = 'gray';
         context.fillRect(this.#x,this.#y, this.#width,this.#height);
+
+    }
+
+    reajusterCartes(){
+        this.#cardPos = this.#x + (this.#width/2 - cardWidth/2);
+        let carte = this.#listeCartes[0];
+        let nouvCarte;
+        carte.setX(this.#cardPos);
+        carte.setY(this.#y);
+
+        let i;
+        for (i = 1; i<this.#listeCartes.length; i++) {
+            carte = this.#listeCartes[i-1];
+            nouvCarte = this.#listeCartes[i];
+            carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+            nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
+            nouvCarte.setY(this.#y);
+        }
     }
 
     getListeCartes()
@@ -575,6 +601,11 @@ class Main{
                 console.log( this.#listeCartes);
                 i--;
             }
+        }
+
+        let j = elements.indexOf(carte);
+        if (j>-1) {
+            elements.splice(j,1);
         }
     }
 
