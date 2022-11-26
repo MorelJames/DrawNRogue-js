@@ -11,6 +11,7 @@ let drawElement = []; // tableau contenant les elements à dessiner sur le canva
 let interval = 1000 / 60; // defini le nombre d'image par seconde du jeu
 let timer = 0;
 let lastTime = 0;
+let deltaTime;
 
 let plateau;
 let lineWidth;
@@ -137,17 +138,22 @@ window.onload = function () {
 
 
 //cette fonction redessine les elements du canvas
-function drawAll(timeStamp) {
-    deltaTime = timeStamp - lastTime;
-    lastTime = timeStamp;
+function drawAll() {
+    deltaTime = window.performance.now() - lastTime;
+    lastTime = window.performance.now();
+
+    console.log(deltaTime);
     if (timer > interval) {
+        console.log('aaa');
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawElement.forEach(elem => elem.draw())
-        timer = 0;
+        timer = timer - interval;
     } else {
         timer += deltaTime;
     }
-    requestAnimationFrame(drawAll);
+    requestAnimationFrame(() =>{
+        drawAll()}
+        );
 }
 
 window.addEventListener('resize', function (e) {
@@ -644,7 +650,68 @@ class Carte {
 
     }
 
+    //pour l'instant le temps est considéré en seconde
+    moveCard(xDistancePerFrame,yDistancePerFrame,x,y){
+        /*let lastTime = date.getTime();
+        while (this.#x != x || this.#y != y) {
+                console.log('aaaa');
+                let deltaTime = date.getTime() - lastTime;
+                lastTime = date.getTime();
 
+                if (this.x != x) {
+                    let xDistancePerFrame = (this.#x - x)/60*time;
+                    this.#x += xDistancePerFrame;
+                }
+                if (this.#y != y) {
+                    let yDistancePerFrame = (this.#y - y)/60*time;
+                    this.#y = yDistancePerFrame;
+                }
+
+                time -= deltaTime;
+            
+        }*/
+        if (timer > interval) {
+        
+            if (this.x != x) {
+                //let xDistancePerFrame = (this.#x - x)/60*time;
+                if (this.#x-x<2 && this.#x-x>-2) {
+                    this.#x = x;
+                }else{
+                    this.#x -= xDistancePerFrame;
+                }
+                
+            }
+            if (this.#y != y) {
+                //let yDistancePerFrame = (this.#y - y)/60*time;
+                if (this.#y-y<2 && this.#y-y>-2) {
+                    this.#y = y;
+                }else{
+                    this.#y -= yDistancePerFrame;
+                }
+                
+            }
+        }
+
+        console.log(this.#x != x || this.#y != y);
+        console.log(this.#x-x);
+        console.log(this.#y-y);
+        if (this.#x != x || this.#y != y) {
+            requestAnimationFrame(() =>{
+                this.moveCard(xDistancePerFrame,yDistancePerFrame,x,y)}
+                )
+        }else{
+            console.log('fini');
+        }
+    }
+    
+    
+    calculMoveDistance(x,y,time){
+        let distance = {
+            'x':(this.#x - x)/(60*time),
+            'y':(this.#y - y)/(60*time),
+        }
+        return distance;
+    }
 
 
 }
@@ -673,6 +740,8 @@ class Main {
         this.#y = canvas.height / 1.3;
         this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
+        this.#cardGap = canvas.width / 8 * 0.2;
+        this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
         context.fillStyle = 'gray';
         context.fillRect(this.#x, this.#y, this.#width, this.#height);
 
@@ -688,10 +757,13 @@ class Main {
 
             let i;
             for (i = 1; i < this.#listeCartes.length; i++) {
-                carte = this.#listeCartes[i - 1];
+                
                 nouvCarte = this.#listeCartes[i];
-                carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
-                nouvCarte.setX(carte.getX() + cardWidth + this.#cardGap);
+                for (let index = i; index >=0; index--) {
+                    carte = this.#listeCartes[index];
+                    carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+                }
+                nouvCarte.setX(this.#listeCartes[i-1].getX() + cardWidth + this.#cardGap);
                 nouvCarte.setY(this.#y);
             }
         }
@@ -727,10 +799,14 @@ class Main {
     }
 
     ajoutCarte(nouvCarte) {
+        let distance;
         if (this.#listeCartes.length == 0) {
             //console.log("feur");
-            nouvCarte.setX(this.#cardPos);
-            nouvCarte.setY(this.#y);
+            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y,1);
+            nouvCarte.moveCard(distance['x'],distance['y'],this.#cardPos, this.#y);
+            console.log('move');
+            //nouvCarte.setX(this.#cardPos);
+            //nouvCarte.setY(this.#y);
             console.log(nouvCarte.getX());
             this.#listeCartes.push(nouvCarte);
         }
@@ -738,10 +814,17 @@ class Main {
             for (let i = 0; i < this.#listeCartes.length; i++) {
                 let carte = this.#listeCartes[i];
                 //console.log(carte);
-                carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
+                let tempX = carte.getX() - (cardWidth/2 + this.#cardGap/2);
+                distance = carte.calculMoveDistance(tempX, carte.getY(),1);
+                carte.moveCard(distance['x'],distance['y'],tempX, this.#y);
+                //carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
-            nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX() + cardWidth + this.#cardGap);
-            nouvCarte.setY(this.#y);
+            //nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX() + cardWidth + this.#cardGap);
+            //nouvCarte.setY(this.#y);
+
+            let tempX = this.#listeCartes[this.#listeCartes.length - 1].getX()  + (cardWidth/2 + this.#cardGap/2);
+            distance = nouvCarte.calculMoveDistance(tempX, this.#y,1);
+            nouvCarte.moveCard(distance['x'],distance['y'],tempX, this.#y);
             this.#listeCartes.push(nouvCarte);
         }
     }
@@ -794,7 +877,7 @@ class Pioche {
 
     mouseClick() {
         if (main.getListeCartes().length < 5 && canDraw) {
-            let carte = new Carte('./images/boo.jpg', 1, 1, 'nomNouv', 5, 1, true);
+            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1, true);
             main.ajoutCarte(carte);
             canDraw = false;
         }
