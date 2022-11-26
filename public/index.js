@@ -775,13 +775,20 @@ class Main {
     }
 
     retirerCarte(carte) {
-        var carteTrouvee = false;
-        for (var i = 0; i < this.#listeCartes.length; i++) {
+        let carteTrouvee = false;
+        let distance;
+        for (let i = 0; i < this.#listeCartes.length; i++) {
             if (carteTrouvee == false) {
-                this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2));
+                let tempX = this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2);
+                distance = this.#listeCartes[i].calculMoveDistance(tempX, this.#listeCartes[i].getY(),0.5);
+                this.#listeCartes[i].moveCard(distance['x'],distance['y'],tempX, this.#y);
+                //this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2));
             }
             else {
-                this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2));
+                let tempX = this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2);
+                distance = this.#listeCartes[i].calculMoveDistance(tempX, this.#listeCartes[i].getY(),0.5);
+                this.#listeCartes[i].moveCard(distance['x'],distance['y'],tempX, this.#y);
+                //this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
             if (this.#listeCartes[i] == carte) {
                 console.log(this.#listeCartes);
