@@ -143,9 +143,7 @@ function drawAll() {
     deltaTime = window.performance.now() - lastTime;
     lastTime = window.performance.now();
 
-    console.log(deltaTime);
     if (timer > interval) {
-        console.log('aaa');
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawElement.forEach(elem => elem.draw())
         timer = timer - interval;
@@ -284,6 +282,7 @@ class Plateau {
         canDraw = true;
         canPlay = true;
         console.log('entré dans action');
+        this.#cardListJoueur[0].attakAnimation();
         for (let i = 0; i < this.#cardListJoueur.length; i++) {
             console.log('tour' + i);
             console.log('j');
@@ -681,9 +680,6 @@ class Carte {
             }
         }
 
-        console.log(this.#x != x || this.#y != y);
-        console.log(this.#x-x);
-        console.log(this.#y-y);
         if (this.#x != x || this.#y != y) {
             requestAnimationFrame(() =>{
                 this.moveCard(xDistancePerFrame,yDistancePerFrame,x,y)}
@@ -704,6 +700,61 @@ class Carte {
             'y':(this.#y - y)/(60*time),
         }
         return distance;
+    }
+
+    attakAnimation(){
+        var distanceY = cardHeight/(60*0.5);
+
+        var y = this.#y - cardHeight;
+
+        inAnimationCard.push(this);
+
+        var fonc = (direction) => {
+            if (timer > interval) {
+                console.log('y ' + y);
+                console.log('this y ' + this.#y);
+                if (this.#y != y) {
+                    if (this.#y-y<2 && this.#y-y>-2) {
+                        this.#y = y;
+                    }else{
+                        if (direction === 'up') {
+                            this.#y -= distanceY;
+                        }else{
+                            this.#y += distanceY;
+                        }
+                        
+                    }
+                    
+                }
+            }
+
+            if (this.#y != y) {
+                requestAnimationFrame(() =>{
+                    fonc(direction)}
+                    )
+            }else{
+                let i = inAnimationCard.indexOf(this);
+                if (i>-1) {
+                    inAnimationCard.splice(i,1);
+                }
+                if (direction ==='up') {
+                    resolve();
+                }
+                
+                console.log('fini');
+            }
+        }
+
+
+        
+
+        var promise = new Promise(function (resolve, reject){
+            fonc('up');
+        });
+
+        promise.then(function(){
+            fonc('down');
+        })
     }
 
 
