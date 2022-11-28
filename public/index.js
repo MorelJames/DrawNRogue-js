@@ -111,6 +111,9 @@ window.onload = function () {
     drawElement.push(plateau);
     //palteau.animate();
 
+    jaugeVie = new JaugeVie();
+    drawElement.push(jaugeVie);
+
     ia = new Ia();
 
     main = new Main();
@@ -405,11 +408,54 @@ class Plateau {
             }
 
         }*/
-        if(this.pvJauge > 10 || this.pvJauge){
+        if(this.pvJauge > 10 || this.pvJauge <1){
             console.log("partie finie");
         }
     }
+}
 
+class JaugeVie{
+    #x;
+    #y;
+    #width;
+    #height;
+    constructor() {
+        this.#x = canvas.width/8;
+        this.#y = canvas.height / 7;
+        this.#height = canvas.height/2;
+        this.#width = cardWidth / 7;
+    }
+
+    draw(){
+        this.#x = canvas.width/8;
+        this.#y = canvas.height / 7;
+        this.#height = canvas.height/2;
+        this.#width = cardWidth / 7;
+
+        context.lineWidth = lineWidth;
+        context.strokeStyle = 'gray';
+        context.strokeRect(this.#x, this.#y, this.#width, this.#height);
+        let increment = this.#height/10;
+        context.fillStyle = 'gray';
+        context.beginPath();
+        for (let i = 0; i <= 10; i++) {
+            context.moveTo(this.#x + this.#width, this.#y + (i*increment));
+            if (i===0 || i===5 || i===10) {
+                context.lineTo(this.#x + 4*this.#width, this.#y + (i*increment));
+            }else{
+                context.lineTo(this.#x + 2*this.#width, this.#y + (i*increment));
+            }
+            
+        }
+        context.closePath();
+        context.stroke();
+
+        let proportionRouge = (this.#height/10)*(10-plateau.pvJauge);
+        context.fillStyle = 'red';
+        context.fillRect(this.#x,this.#y,this.#width,proportionRouge);
+        context.fillStyle = 'blue';
+        context.fillRect(this.#x,this.#y+proportionRouge,this.#width,this.#height-proportionRouge);
+    }
 }
 
 class Emplacement {
