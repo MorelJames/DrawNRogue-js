@@ -34,6 +34,8 @@ let maxHeight;
 
 let inAnimationCard = [];
 
+let carteFinTour = false;
+
 window.onload = function () {
     canvas = document.querySelector('canvas');
     context = canvas.getContext('2d');
@@ -246,8 +248,12 @@ class Plateau {
         }
         for (let i = 0; i < this.#cardListEnemie.length; i++) {
             if (this.#cardListEnemie[i] != undefined) {
-                this.#cardListEnemie[i].setX(this.listeEmplacements[i].getX());
-                this.#cardListEnemie[i].setY(this.listeEmplacements[i].getY());
+                let ind = inAnimationCard.indexOf(this.#cardListEnemie[i]);
+                if (ind <0) {
+                    this.#cardListEnemie[i].setX(this.listeEmplacements[i].getX());
+                    this.#cardListEnemie[i].setY(this.listeEmplacements[i].getY());
+                }
+                
             }
 
 
@@ -256,6 +262,8 @@ class Plateau {
 
     addCard(card, pos, joueur) {
         if (joueur) {
+            card.setPlayed();
+            card.setPos(pos);
             let distance = card.calculMoveDistance(this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY(),1);
             card.moveCard(distance['x'],distance['y'],this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY());
             this.#cardListJoueur[pos] = card;
@@ -281,14 +289,97 @@ class Plateau {
         endTurn = false;
         canDraw = true;
         canPlay = true;
+
+        var i = 0;
+
+        var fonctionAtk = ()=>{
+            if (i<this.#cardListJoueur.length) {
+                let joueurAttaque = new Promise((resolve) =>{
+                    console.log('tour ' + i);
+                    console.log('attaque joueur');
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].attakAnimation();
+                    }
+                    else{
+                        resolve();
+                    }
+                    var verif = ()=>{
+                        if (carteFinTour) {
+                            console.log('fin tour joueur');
+                            resolve();
+                        }else{
+                            setTimeout(() => {verif()}, 100);
+                        }
+                    }
+                    verif();
+                })
+                joueurAttaque.then(()=>{
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
+                    }
+                    carteFinTour = false;
+        
+                    let ennemieAttaque = new Promise((resolve) =>{
+                        console.log('attaque enemie');
+                        if (this.#cardListEnemie[i] != undefined) {
+                            console.log('entre dans anim enemie');
+                            console.log(this.#cardListEnemie[i]);
+                            this.#cardListEnemie[i].attakAnimation();
+                        }
+                        else{
+                            console.log('va dans le resolve undefined');
+                            resolve();
+                        }
+                        var verif = ()=>{
+                            if (carteFinTour) {
+                                console.log('fin tour enemie');
+                                resolve();
+                            }else{
+                                setTimeout(() => {verif()}, 100);
+                            }
+                        }
+                        verif();
+                    })
+                    ennemieAttaque.then(()=>{
+                        console.log('resove enemie');
+                        if (this.#cardListEnemie[i] != undefined) {
+                            this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur, false);
+                        }
+                        carteFinTour = false;
+        
+                        for (let j = 0; j < this.#cardListJoueur.length; j++) {
+                            if (this.#cardListJoueur[j] != undefined) {
+                                if (this.#cardListJoueur[j].getHp() <= 0) {
+                                    this.listeEmplacements[j].setFree();
+                                    this.#cardListJoueur[j] = undefined;
+                                }
+                                if (this.#cardListEnemie[j] != undefined)
+                                    if (this.#cardListEnemie[j].getHp() <= 0) {
+                                        this.listeEmplacements[j].setFree();
+                                        this.#cardListEnemie[j] = undefined;
+                                    }
+                            }
+            
+                        }
+                        i++;
+                        fonctionAtk();
+                    })
+                })
+            }
+            else{
+                console.log('fin');
+            }
+        }
+
+        fonctionAtk();
+        
+
         console.log('entré dans action');
-        this.#cardListJoueur[0].attakAnimation();
-        for (let i = 0; i < this.#cardListJoueur.length; i++) {
+        /*for (let i = 0; i < this.#cardListJoueur.length; i++) {
             console.log('tour' + i);
             console.log('j');
             console.log(this.#cardListJoueur[i]);
             if (this.#cardListJoueur[i] != undefined) {
-                console.log('va dans tourCarte');
                 this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
             }
             console.log('e');
@@ -313,29 +404,11 @@ class Plateau {
 
             }
 
-        }
+        }*/
         if(this.pvJauge > 10 || this.pvJauge){
             console.log("partie finie");
         }
-    /*animate(){
-        this.width = canvas.width/2;
-        this.height = canvas.height/2;
-        this.x = canvas.width/6;
-        this.y = canvas.height/5;
-        this.#draw();
-
-        let xtmp = this.x;
-        for (let i = 0; i < 8; i++) {
-            
-            this.listeEmplacements[i].draw(xtmp);
-            xtmp+=this.width/4;
-            if (i===3) {
-                xtmp = this.x;
-            }
-            
-        }
-        requestAnimationFrame(this.animate.bind(this));
-    }*/}
+    }
 
 }
 
@@ -435,8 +508,8 @@ class Emplacement {
             inAnimationCard.push(selectedCard);
             this.#placedCart = selectedCard;
             main.retirerCarte(selectedCard);
-            selectedCard.setPlayed();
-            selectedCard.setPos(this.#pos - 4);
+            //selectedCard.setPlayed();
+            //selectedCard.setPos(this.#pos - 4);
             plateau.addCard(selectedCard, this.#pos - 4, true);
             this.#isFull = true;
             
@@ -703,56 +776,84 @@ class Carte {
     }
 
     attakAnimation(){
-        var distanceY = cardHeight/(60*0.5);
+        console.log('entré dans animation');
+        var distanceY = cardHeight/(60*0.05);
+        if (this.#PlayerCard) {
+            var y = this.#y - cardHeight;
+        }else{
+            var y = this.#y + cardHeight;
+        }
+        
 
-        var y = this.#y - cardHeight;
-
-        inAnimationCard.push(this);
+        var deplacementFin = false;
 
         var fonc = (direction) => {
+            console.log('entré dans la fonction');
             if (timer > interval) {
-                console.log('y ' + y);
-                console.log('this y ' + this.#y);
                 if (this.#y != y) {
                     if (this.#y-y<2 && this.#y-y>-2) {
                         this.#y = y;
                     }else{
                         if (direction === 'up') {
-                            this.#y -= distanceY;
+                            if (this.#PlayerCard) {
+                                this.#y -= distanceY;
+                            }else{
+                                this.#y += distanceY;
+                            }
+                            
                         }else{
-                            this.#y += distanceY;
+                            if (this.#PlayerCard) {
+                                this.#y += distanceY;
+                            }else{
+                                this.#y -= distanceY;
+                            }
                         }
-                        
                     }
-                    
                 }
             }
-
             if (this.#y != y) {
                 requestAnimationFrame(() =>{
                     fonc(direction)}
                     )
             }else{
-                let i = inAnimationCard.indexOf(this);
-                if (i>-1) {
-                    inAnimationCard.splice(i,1);
+
+                if (direction === 'down') {
+                    let i = inAnimationCard.indexOf(this);
+                    if (i>-1) {
+                        inAnimationCard.splice(i,1);
+                    }
+                    carteFinTour = true;
                 }
-                if (direction ==='up') {
-                    resolve();
-                }
-                
-                console.log('fini');
+                console.log('fini fini');
+                deplacementFin=true;           
             }
         }
-
-
-        
-
-        var promise = new Promise(function (resolve, reject){
+        var promise = new Promise((resolve) => {
+            console.log('entré dans la promesse');
+            let i = inAnimationCard.indexOf(this);
+                if (i<0) {
+                    console.log('ajout dans la liste');
+                    inAnimationCard.push(this);
+                }
+            
             fonc('up');
+            let verif = () =>{
+                if (deplacementFin) {
+                    resolve();
+                }else{
+                    setTimeout(() => {verif()}, 100);
+                }
+            }
+            verif()
         });
-
-        promise.then(function(){
+        promise.then(()=>{
+            console.log('azertyfdsdfghgdsdfgh');
+            if (this.#PlayerCard) {
+                y = this.#y + cardHeight;
+            }else{
+                y = this.#y - cardHeight; 
+            }
+            
             fonc('down');
         })
     }
@@ -1027,7 +1128,7 @@ class Ia {
         }
         if (availablePlace.length > 0) {
             let pos = availablePlace[Math.floor(Math.random() * availablePlace.length)];
-            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk);
+            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk, false);
             plateau.addCard(newCard, pos);
         }
 
