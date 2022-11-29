@@ -154,9 +154,6 @@ recommencer.onclick = function(){
     finPartiePage.style.display = 'none';
     canvas.style.display = 'block';
     document.body.style.backgroundColor = 'white';
-    finPartiePage.classList.toggle('ecranFin');
-    recommencer.classList.toggle('boutonDefaite');
-    voirRegle.classList.toggle('boutonDefaite');
     lancerPartie();
 }
 
@@ -164,9 +161,7 @@ voirRegle.onclick = function(){
     finPartiePage.style.display = 'none';
     regles.style.display = 'flex';
     document.body.style.backgroundColor = 'white';
-    finPartiePage.classList.toggle('ecranFin');
-    recommencer.classList.toggle('boutonDefaite');
-    voirRegle.classList.toggle('boutonDefaite');
+
 }
 
     
@@ -225,15 +220,13 @@ window.addEventListener('resize', resize)
 function finPartie() {
     canvas.style.display = 'none';
     finPartiePage.style.display = 'flex';
-    finPartiePage.classList.toggle('ecranFin');
     let p = document.getElementById('message');
     
     if (plateau.jaugeVie<1) {
         p.innerText = 'Victoire';
+        document.body.style.backgroundColor = "darkgreen";
     }else{
         p.innerText = 'Défaite';
-        recommencer.classList.toggle('boutonDefaite');
-        voirRegle.classList.toggle('boutonDefaite');
         document.body.style.backgroundColor = "darkred";
     }
     drawElement = null;
@@ -510,11 +503,11 @@ class JaugeVie{
         context.closePath();
         context.stroke();
 
-        let proportionRouge = (this.#height/10)*(10-plateau.pvJauge);
+        let proportionBleu = (this.#height/10)*(10-plateau.pvJauge);
+        context.fillStyle = 'lightblue';
+        context.fillRect(this.#x,this.#y,this.#width,proportionBleu);
         context.fillStyle = 'red';
-        context.fillRect(this.#x,this.#y,this.#width,proportionRouge);
-        context.fillStyle = 'blue';
-        context.fillRect(this.#x,this.#y+proportionRouge,this.#width,this.#height-proportionRouge);
+        context.fillRect(this.#x,this.#y+proportionBleu,this.#width,this.#height-proportionBleu);
     }
 }
 
