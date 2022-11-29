@@ -1,4 +1,4 @@
-let canvas = document.querySelector('canvas');
+let canvas;
 let context;
 let palteau;
 let rect;
@@ -42,8 +42,10 @@ let inAnimationCard = [];
 
 let carteFinTour = false;
 
+let requesteDrawAll;
 
 button.onclick = function () {
+    canvas = document.querySelector('canvas');
     regles.style.display = 'none';
     canvas.style.display = 'block';
     context = canvas.getContext('2d');
@@ -163,12 +165,12 @@ function drawAll() {
     } else {
         timer += deltaTime;
     }
-    requestAnimationFrame(() =>{
+    requesteDrawAll = requestAnimationFrame(() =>{
         drawAll()}
         );
 }
 
-window.addEventListener('resize', function (e) {
+function resize(){
     let ratioW = maxWidth / window.innerWidth;
     let ratioH = maxHeight / window.innerHeight;
 
@@ -197,13 +199,33 @@ window.addEventListener('resize', function (e) {
     main.refreshPosInfo();
 
     main.reajusterCartes();
+}
 
-})
+window.addEventListener('resize', resize)
 
 
 function finPartie() {
     canvas.style.display = 'none';
     finPartiePage.style.display = 'block';
+    let texte = finPartiePage.getElementById('message');
+    if (plateau.jaugeVie<1) {
+        texte.textContent = 'Défaite';
+    }else{
+        texte.textContent = 'Victoire';
+    }
+    drawElement = null;
+    elements = null;
+    plateau = null;
+    main = null;
+    pioche = null;
+    endTurnButton = null;
+    ia = null;
+    jaugeVie = null;
+    cancelAnimationFrame(requesteDrawAll);
+    context = null;
+    canvas = null;
+    window.removeEventListener('resize',resize);
+    
 }
 
 class Plateau {
