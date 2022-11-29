@@ -1,12 +1,12 @@
-let canvas;
+const canvas = document.querySelector('canvas');
 let context;
 let palteau;
 let rect;
 let offSetX;
 let offSetY;
-let elements = []; //tableau contenant les elements qui peuvent être cliqué à la souris
+let elements; //tableau contenant les elements qui peuvent être cliqué à la souris
 
-let drawElement = []; // tableau contenant les elements à dessiner sur le canvas
+let drawElement; // tableau contenant les elements à dessiner sur le canvas
 
 let interval = 1000 / 60; // defini le nombre d'image par seconde du jeu
 let timer = 0;
@@ -33,21 +33,19 @@ let maxWidth;
 let maxHeight;
 
 
-const button = document.getElementById("demarrer");
+const demarrer = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
-
 const finPartiePage = document.getElementById('fin');
+const recommencer = document.getElementById('btnRecommencer');
+const voirRegle = document.getElementById('btnRegle');
 
-let inAnimationCard = [];
+let inAnimationCard;
 
 let carteFinTour = false;
 
 let requesteDrawAll;
 
-button.onclick = function () {
-    canvas = document.querySelector('canvas');
-    regles.style.display = 'none';
-    canvas.style.display = 'block';
+function lancerPartie(){
     context = canvas.getContext('2d');
     maxWidth = 1920;
     maxHeight = 1080;
@@ -95,16 +93,6 @@ button.onclick = function () {
             }
             i++;
         }
-
-        /*elements.forEach(e =>{
-            let xElem = e.getX();
-            let yElem = e.getY();
-            let widthElem = e.getWidth();
-            let heightElem = e.getHeight();
-            if (x > xElem && x< xElem+ widthElem && y > yElem && y < yElem + heightElem) {
-                e.mouseClick();
-            }
-        });*/
     })
 
     context.lineWidth = canvas.width / 100;
@@ -116,6 +104,10 @@ button.onclick = function () {
 
     canDraw = true;
     canPlay = true;
+
+    drawElement = [];
+    elements = [];
+    inAnimationCard = [];
 
     plateau = new Plateau();
     drawElement.push(plateau);
@@ -152,6 +144,32 @@ button.onclick = function () {
 
 }
 
+demarrer.onclick = function () {
+    regles.style.display = 'none';
+    canvas.style.display = 'block';
+    lancerPartie();
+}
+
+recommencer.onclick = function(){
+    finPartiePage.style.display = 'none';
+    canvas.style.display = 'block';
+    document.body.style.backgroundColor = 'white';
+    finPartiePage.classList.toggle('ecranFin');
+    recommencer.classList.toggle('boutonDefaite');
+    voirRegle.classList.toggle('boutonDefaite');
+    lancerPartie();
+}
+
+voirRegle.onclick = function(){
+    finPartiePage.style.display = 'none';
+    regles.style.display = 'flex';
+    document.body.style.backgroundColor = 'white';
+    finPartiePage.classList.toggle('ecranFin');
+    recommencer.classList.toggle('boutonDefaite');
+    voirRegle.classList.toggle('boutonDefaite');
+}
+
+    
 
 //cette fonction redessine les elements du canvas
 function drawAll() {
@@ -206,12 +224,17 @@ window.addEventListener('resize', resize)
 
 function finPartie() {
     canvas.style.display = 'none';
-    finPartiePage.style.display = 'block';
-    let texte = finPartiePage.getElementById('message');
+    finPartiePage.style.display = 'flex';
+    finPartiePage.classList.toggle('ecranFin');
+    let p = document.getElementById('message');
+    
     if (plateau.jaugeVie<1) {
-        texte.textContent = 'Défaite';
+        p.innerText = 'Victoire';
     }else{
-        texte.textContent = 'Victoire';
+        p.innerText = 'Défaite';
+        recommencer.classList.toggle('boutonDefaite');
+        voirRegle.classList.toggle('boutonDefaite');
+        document.body.style.backgroundColor = "darkred";
     }
     drawElement = null;
     elements = null;
@@ -223,7 +246,6 @@ function finPartie() {
     jaugeVie = null;
     cancelAnimationFrame(requesteDrawAll);
     context = null;
-    canvas = null;
     window.removeEventListener('resize',resize);
     
 }
