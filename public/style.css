@@ -42,3 +42,33 @@ canvas{
   /*width: 100%;*/
   /*height: 100%;*/
 }
+
+#fin{
+  padding-top: 20%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+#fin p{
+  font-size: 300%;
+  padding-bottom: 10%;
+}
+
+#fin #bouton button{
+  border: 2px solid gray;
+  color: black;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+#fin #bouton button:hover{
+  background-color: gray;
+  border: 2px solid black;
+}
