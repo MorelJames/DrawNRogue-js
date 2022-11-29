@@ -32,12 +32,19 @@ let aspectRatio;
 let maxWidth;
 let maxHeight;
 
+
+const button = document.getElementById("demarrer");
+const regles = document.getElementById("regles");
+
 let inAnimationCard = [];
 
 let carteFinTour = false;
 
-window.onload = function () {
+
+button.onclick = function () {
     canvas = document.querySelector('canvas');
+    regles.style.display = 'none';
+    canvas.style.display = 'block';
     context = canvas.getContext('2d');
     maxWidth = 1920;
     maxHeight = 1080;

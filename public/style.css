@@ -4,7 +4,38 @@
   box-sizing: border-box;
 }
 
+#regles
+{
+  display: flex;
+  justify-self: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#texte
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+img
+{
+  margin: 2%;
+}
+
+#img_exemples
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+
 canvas{
+  display:none;
   position: relative;
   top:0;
   left: 0;
