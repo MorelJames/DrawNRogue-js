@@ -1,4 +1,4 @@
-let canvas;
+let canvas = document.querySelector('canvas');
 let context;
 let palteau;
 let rect;
@@ -36,13 +36,14 @@ let maxHeight;
 const button = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
 
+const finPartiePage = document.getElementById('fin');
+
 let inAnimationCard = [];
 
 let carteFinTour = false;
 
 
 button.onclick = function () {
-    canvas = document.querySelector('canvas');
     regles.style.display = 'none';
     canvas.style.display = 'block';
     context = canvas.getContext('2d');
@@ -198,6 +199,12 @@ window.addEventListener('resize', function (e) {
     main.reajusterCartes();
 
 })
+
+
+function finPartie() {
+    canvas.style.display = 'none';
+    finPartiePage.style.display = 'block';
+}
 
 class Plateau {
     #cardListJoueur;
@@ -377,7 +384,11 @@ class Plateau {
                 })
             }
             else{
-                console.log('fin');
+                console.log('fin total');
+                if(this.pvJauge > 10 || this.pvJauge <1){
+                    console.log("partie finie");
+                    finPartie();
+                }
             }
         }
 
@@ -415,9 +426,7 @@ class Plateau {
             }
 
         }*/
-        if(this.pvJauge > 10 || this.pvJauge <1){
-            console.log("partie finie");
-        }
+        
     }
 }
 
@@ -913,6 +922,7 @@ class Carte {
 
 
 }
+
 
 class Main {
     #x;
