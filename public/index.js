@@ -46,6 +46,21 @@ let carteFinTour = false;
 
 let requesteDrawAll;
 
+var donnnerEffet = requestToBDD(REQUEST_ALL_EFFET);
+donnnerEffet.then((data)=>{
+    console.log(data);
+    for(let i = 0; i<Object.keys(data).length; i++){
+        console.log("data[i]");
+    }
+});
+
+var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
+donnerCarte.then((data)=>{
+    for(let i = 0; i<Object.keys(data).length; i++){
+        console.log(data[i]);
+    }
+});
+
 function lancerPartie() {
     context = canvas.getContext("2d");
     maxWidth = 1920;
@@ -1413,10 +1428,3 @@ async function requestToBDD(requeste, parameter) {
     return await request.json();
 
 }
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-      currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
-  }
