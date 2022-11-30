@@ -33,6 +33,7 @@ let maxWidth;
 let maxHeight;
 
 
+
 const demarrer = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
 const finPartiePage = document.getElementById('fin');
@@ -1273,5 +1274,46 @@ class Vol extends Effet {
     }
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
+    }
+}
+
+class bdoRequest {
+
+    constructor(){}
+
+    getAllCarte(){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            
+            if(this.readyState == 4 && this.status == 200){
+                console.log(this.response);
+            }
+            else if (this.readyState ==4){
+                alert("errer bdd");
+            }
+        };
+        xhr.open("POST", "http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/carteJson.php", true);
+        xhr.responseType = "json";
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send();
+        return this.response;
+    }
+
+    getAllEffet(){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            
+            if(this.readyState == 4 && this.status == 200){
+                console.log(this.response);
+            }
+            else if (this.readyState ==4){
+                alert("errer bdd");
+            }
+        };
+        xhr.open("POST", "http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/effetJson.php", true);
+        xhr.responseType = "json";
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send();
+        return this.response;
     }
 }
