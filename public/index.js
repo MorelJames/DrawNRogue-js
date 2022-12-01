@@ -337,7 +337,7 @@ class Plateau {
             let distance = card.calculMoveDistance(
                 this.listeEmplacements[card.getPos() + 4].getX(),
                 this.listeEmplacements[card.getPos() + 4].getY(),
-                1
+                0.5
             );
             card.moveCard(
                 distance["x"],
@@ -1171,7 +1171,7 @@ class Main {
         inAnimationCard.push(nouvCarte);
         if (this.#listeCartes.length == 0) {
             //console.log("feur");
-            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y, 1);
+            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y, 0.5);
             nouvCarte.moveCard(
                 distance["x"],
                 distance["y"],
@@ -1188,7 +1188,7 @@ class Main {
                 let carte = this.#listeCartes[i];
                 //console.log(carte);
                 let tempX = carte.getX() - (cardWidth / 2 + this.#cardGap / 2);
-                distance = carte.calculMoveDistance(tempX, carte.getY(), 1);
+                distance = carte.calculMoveDistance(tempX, carte.getY(), 0.5);
                 carte.moveCard(distance["x"], distance["y"], tempX, this.#y);
                 //carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
@@ -1198,7 +1198,7 @@ class Main {
             let tempX =
                 this.#listeCartes[this.#listeCartes.length - 1].getX() +
                 (cardWidth / 2 + this.#cardGap / 2);
-            distance = nouvCarte.calculMoveDistance(tempX, this.#y, 1);
+            distance = nouvCarte.calculMoveDistance(tempX, this.#y, 0.5);
             nouvCarte.moveCard(distance["x"], distance["y"], tempX, this.#y);
             this.#listeCartes.push(nouvCarte);
         }
