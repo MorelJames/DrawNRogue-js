@@ -126,6 +126,9 @@ function lancerPartie(){
 
     endTurnButton = new EndTurnButton();
 
+    pA = new pointsAction();
+    pA.ajoutPA(1);
+
 
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
@@ -319,6 +322,7 @@ class Plateau {
         if (joueur) {
             card.setPlayed();
             card.setPos(pos);
+            pA.retirerPA(card.getCout());
             let distance = card.calculMoveDistance(this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY(),1);
             card.moveCard(distance['x'],distance['y'],this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY());
             this.#cardListJoueur[pos] = card;
@@ -430,6 +434,7 @@ class Plateau {
             }
         }
 
+        pA.ajoutPA(1);
         fonctionAtk();
         
 
@@ -614,7 +619,7 @@ class Emplacement {
             this.#isFull = true;
             
             selectedCard = undefined;
-            canPlay = false;
+            //canPlay = false;
             console.log("test");
         }
     }
@@ -634,10 +639,11 @@ class Carte {
     #atk;
     #isPlayed;
     #effet;
+    #cout;
     #pos;
     #PlayerCard;
 
-    constructor(imgSrc, x, y, nom, hp, atk, playerCard) {
+    constructor(imgSrc, x, y, nom, hp, atk, cout, playerCard) {
         this.#img = new Image();
         this.#img.src = imgSrc;
         //console.log(this.#img.src);
@@ -655,6 +661,7 @@ class Carte {
         this.#atk = atk;
         this.#isPlayed = false;
         this.#effet = new Effet();
+        this.#cout = cout;
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
@@ -720,7 +727,7 @@ class Carte {
     mouseClick() {
         console.log(this.#nom);
         console.log(!this.#isPlayed);
-        if (!this.#isPlayed) {
+        if (!this.#isPlayed && this.#cout <= pA.getPA()) {
             selectedCard = this;
         }
     }
@@ -785,6 +792,10 @@ class Carte {
 
     getHpmax() {
         return this.#hpmax
+    }
+
+    getCout(){
+        return this.#cout;
     }
     isPlayerCard() {
         return this.#PlayerCard;
@@ -1133,7 +1144,7 @@ class Pioche {
 
     mouseClick() {
         if (main.getListeCartes().length < 5 && canDraw && inAnimationCard.length ==0) {
-            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1, true);
+            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1, 1, true);
             main.ajoutCarte(carte);
             canDraw = false;
         }
@@ -1229,10 +1240,87 @@ class Ia {
         }
         if (availablePlace.length > 0) {
             let pos = availablePlace[Math.floor(Math.random() * availablePlace.length)];
-            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk, false);
+            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk, 0, false);
             plateau.addCard(newCard, pos);
         }
 
+    }
+}
+
+
+class pointsAction {
+    #x;
+    #y;
+    #pA;
+    #width;
+    #height;
+
+    constructor() {
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
+        this.#pA = 0;
+        drawElement.push(this);
+        elements.push(this);
+    }
+
+    draw() {
+
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
+
+        context.fillStyle = 'gray';
+        context.beginPath();
+        context.moveTo(this.#x, this.#y);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+        context.lineTo(this.#x, this.#y + this.#height);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+        context.lineTo(this.#x, this.#y);
+        context.closePath();
+        context.fill();
+        context.font = canvas.width / 65 + 'px Arial';
+        context.fillStyle = 'black';
+        context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
+    }
+
+    mouseHover() {
+
+    }
+
+    mouseClick() {
+    }
+
+    getX() {
+        return this.#x;
+    }
+    getY() {
+        return this.#y;
+    }
+
+    getWidth() {
+        return this.#width;
+    }
+    getHeight() {
+        return this.#height;
+    }
+
+    getPA() {
+        return this.#pA;
+    }
+
+    ajoutPA(i) {
+        this.#pA += i;
+    }
+
+    retirerPA(i){
+        this.#pA -= i;
     }
 }
 
