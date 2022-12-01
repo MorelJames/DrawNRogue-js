@@ -1,4 +1,4 @@
-const canvas = document.querySelector('canvas');
+const canvas = document.querySelector("canvas");
 let context;
 let palteau;
 let rect;
@@ -32,53 +32,62 @@ let aspectRatio;
 let maxWidth;
 let maxHeight;
 
-
+var imgFondCarte = new Image();
+imgFondCarte.src = './images/fondCarte.png';
 
 const demarrer = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
-const finPartiePage = document.getElementById('fin');
-const recommencer = document.getElementById('btnRecommencer');
-const voirRegle = document.getElementById('btnRegle');
-
+const finPartiePage = document.getElementById("fin");
+const recommencer = document.getElementById("btnRecommencer");
+const voirRegle = document.getElementById("btnRegle");
+const REQUEST_ALL_CARTE = 0;
+const REQUEST_ALL_EFFET = 1;
 let inAnimationCard;
 
 let carteFinTour = false;
 
 let requesteDrawAll;
 
-function lancerPartie(){
-    context = canvas.getContext('2d');
+var listCarte = [];
+
+var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
+donnerCarte.then((data)=>{
+    for(let i = 0; i<Object.keys(data).length; i++){
+        let effet = getEffet(data[i]["_ideffet"]);
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],effet))
+    }
+});
+
+
+function lancerPartie() {
+    context = canvas.getContext("2d");
     maxWidth = 1920;
     maxHeight = 1080;
     let ratioW = maxWidth / window.innerWidth;
     let ratioH = maxHeight / window.innerHeight;
 
     if (ratioW < ratioH) {
-        canvas.width = maxWidth * 1 / ratioH,
-            canvas.height = maxHeight * 1 / ratioH;
+        (canvas.width = (maxWidth * 1) / ratioH),
+            (canvas.height = (maxHeight * 1) / ratioH);
     } else {
-        canvas.width = maxWidth * 1 / ratioW,
-            canvas.height = maxHeight * 1 / ratioW;
+        (canvas.width = (maxWidth * 1) / ratioW),
+            (canvas.height = (maxHeight * 1) / ratioW);
     }
 
     aspectRatio = 16 / 9;
 
     rect = canvas.getBoundingClientRect();
-    offSetX = canvas.width / rect.width,
-        offSetY = canvas.height / rect.height;
+    (offSetX = canvas.width / rect.width),
+        (offSetY = canvas.height / rect.height);
 
-
-
-    canvas.addEventListener('mousemove', (event) => {
+    canvas.addEventListener("mousemove", (event) => {
         //console.log(event);
         let x = (event.x - rect.left) * offSetX;
         let y = (event.y - rect.top) * offSetY;
-        elements.forEach(elem => elem.mouseHover(x, y));
-    })
+        elements.forEach((elem) => elem.mouseHover(x, y));
+    });
 
-
-
-    canvas.addEventListener('click', (event) => {
+    canvas.addEventListener("click", (event) => {
         let x = (event.x - rect.left) * offSetX;
         let y = (event.y - rect.top) * offSetY;
         let clicked = false;
@@ -88,18 +97,20 @@ function lancerPartie(){
             let yElem = elements[i].getY();
             let widthElem = elements[i].getWidth();
             let heightElem = elements[i].getHeight();
-            if (x > xElem && x < xElem + widthElem && y > yElem && y < yElem + heightElem) {
+            if (
+                x > xElem &&
+                x < xElem + widthElem &&
+                y > yElem &&
+                y < yElem + heightElem
+            ) {
                 elements[i].mouseClick();
                 clicked = true;
             }
             i++;
         }
-    })
+    });
 
     context.lineWidth = canvas.width / 100;
-
-    cardWidth = canvas.width / 8 * 0.8;
-    cardHeight = canvas.height / 4 * 0.8;
 
     endTurn = false;
 
@@ -126,13 +137,14 @@ function lancerPartie(){
 
     endTurnButton = new EndTurnButton();
 
+    public/index.js
     pA = new pointsAction();
     pA.ajoutPA(1);
 
 
+
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
-
 
     //elements.push(pioche);
 
@@ -144,31 +156,26 @@ function lancerPartie(){
         context.drawImage(img,0,0);
     };
     img.src = './boo.jpg';*/
-
-
 }
 
 demarrer.onclick = function () {
-    regles.style.display = 'none';
-    canvas.style.display = 'block';
+    regles.style.display = "none";
+    canvas.style.display = "block";
     lancerPartie();
-}
+};
 
-recommencer.onclick = function(){
-    finPartiePage.style.display = 'none';
-    canvas.style.display = 'block';
-    document.body.style.backgroundColor = 'white';
+recommencer.onclick = function () {
+    finPartiePage.style.display = "none";
+    canvas.style.display = "block";
+    document.body.style.backgroundColor = "white";
     lancerPartie();
-}
+};
 
-voirRegle.onclick = function(){
-    finPartiePage.style.display = 'none';
-    regles.style.display = 'flex';
-    document.body.style.backgroundColor = 'white';
-
-}
-
-    
+voirRegle.onclick = function () {
+    finPartiePage.style.display = "none";
+    regles.style.display = "flex";
+    document.body.style.backgroundColor = "white";
+};
 
 //cette fonction redessine les elements du canvas
 function drawAll() {
@@ -177,60 +184,58 @@ function drawAll() {
 
     if (timer > interval) {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawElement.forEach(elem => elem.draw())
+        drawElement.forEach((elem) => elem.draw());
         timer = timer - interval;
     } else {
         timer += deltaTime;
     }
-    requesteDrawAll = requestAnimationFrame(() =>{
-        drawAll()}
-        );
+    requesteDrawAll = requestAnimationFrame(() => {
+        drawAll();
+    });
 }
 
-function resize(){
+function resize() {
     let ratioW = maxWidth / window.innerWidth;
     let ratioH = maxHeight / window.innerHeight;
 
     if (ratioW < ratioH) {
-        canvas.width = maxWidth * 1 / ratioH,
-            canvas.height = maxHeight * 1 / ratioH;
+        (canvas.width = (maxWidth * 1) / ratioH),
+            (canvas.height = (maxHeight * 1) / ratioH);
     } else {
-        canvas.width = maxWidth * 1 / ratioW,
-            canvas.height = maxHeight * 1 / ratioW;
+        (canvas.width = (maxWidth * 1) / ratioW),
+            (canvas.height = (maxHeight * 1) / ratioW);
     }
-    console.log('win');
+    console.log("win");
     console.log(window.innerWidth);
     console.log(window.innerHeight);
 
-
-    console.log('can');
+    console.log("can");
     console.log(canvas.width);
 
     console.log(canvas.height);
 
     context.lineWidth = canvas.width / 100;
-    cardWidth = canvas.width / 8 * 0.8;
-    cardHeight = canvas.height / 4 * 0.8;
+    cardWidth = (canvas.width / 8) * 0.8;
+    cardHeight = (plateau.height / 2) * 0.8;
     context.clearRect(0, 0, canvas.width, canvas.height);
-    drawElement.forEach(elem => elem.draw());
+    drawElement.forEach((elem) => elem.draw());
     main.refreshPosInfo();
 
     main.reajusterCartes();
 }
 
-window.addEventListener('resize', resize)
-
+window.addEventListener("resize", resize);
 
 function finPartie() {
-    canvas.style.display = 'none';
-    finPartiePage.style.display = 'flex';
-    let p = document.getElementById('message');
-    
-    if (plateau.jaugeVie<1) {
-        p.innerText = 'Victoire';
+    canvas.style.display = "none";
+    finPartiePage.style.display = "flex";
+    let p = document.getElementById("message");
+
+    if (plateau.jaugeVie < 1) {
+        p.innerText = "Victoire";
         document.body.style.backgroundColor = "darkgreen";
-    }else{
-        p.innerText = 'Défaite';
+    } else {
+        p.innerText = "Défaite";
         document.body.style.backgroundColor = "darkred";
     }
     drawElement = null;
@@ -243,8 +248,7 @@ function finPartie() {
     jaugeVie = null;
     cancelAnimationFrame(requesteDrawAll);
     context = null;
-    window.removeEventListener('resize',resize);
-    
+    window.removeEventListener("resize", resize);
 }
 
 class Plateau {
@@ -258,17 +262,25 @@ class Plateau {
     listeEmplacements = [];
     constructor() {
         this.width = canvas.width / 2;
-        this.height = canvas.height / 2;
+        this.height = canvas.height / 1.5;
         this.x = canvas.width / 4;
         this.y = canvas.height / 7;
         //this.#draw();
         this.pvJauge = 5;
+        cardWidth = (canvas.width / 8) * 0.8;
+        cardHeight = (this.height / 2) * 0.8;
         let tmpY = this.y;
         let emplacementPos = 0;
         for (let i = 0; i < 2; i++) {
             let tmpX = this.x;
             for (let index = 0; index < 4; index++) {
-                let emplacement = new Emplacement(tmpX, tmpY, cardWidth, cardHeight, emplacementPos);
+                let emplacement = new Emplacement(
+                    tmpX,
+                    tmpY,
+                    cardWidth,
+                    cardHeight,
+                    emplacementPos
+                );
                 elements.push(emplacement);
                 this.listeEmplacements.push(emplacement);
                 emplacementPos++;
@@ -281,40 +293,46 @@ class Plateau {
     }
 
     draw() {
-        context.fillStyle = 'brown';
+        context.fillStyle = "brown";
 
         this.width = canvas.width / 2;
-        this.height = canvas.height / 2;
+        this.height = canvas.height / 1.5;
         this.x = canvas.width / 4;
-        this.y = canvas.height / 7;
+        this.y = canvas.height / 50;
 
         //console.log(this.width);
         context.fillRect(this.x, this.y, this.width, this.height);
 
+        cardWidth = (canvas.width / 8) * 0.8;
+        cardHeight = (this.height / 2) * 0.8;
 
-        let xtmp = this.x + this.width / 4 * 0.1;
-        let ytmp = this.y + this.height / 2 * 0.1;
+        let xtmp = this.x + (this.width / 4) * 0.1;
+        let ytmp = this.y + (this.height / 2) * 0.1;
         for (let i = 0; i < 8; i++) {
-
-            this.listeEmplacements[i].draw(xtmp, ytmp, this.width / 4 * 0.8, this.height / 2 * 0.8);
+            this.listeEmplacements[i].draw(
+                xtmp,
+                ytmp,
+                (this.width / 4) * 0.8,
+                (this.height / 2) * 0.8
+            );
             xtmp += this.width / 4;
             if (i === 3) {
-                xtmp = this.x + this.width / 4 * 0.1;
+                xtmp = this.x + (this.width / 4) * 0.1;
                 ytmp += this.height / 2;
             }
-
         }
         for (let i = 0; i < this.#cardListEnemie.length; i++) {
             if (this.#cardListEnemie[i] != undefined) {
                 let ind = inAnimationCard.indexOf(this.#cardListEnemie[i]);
-                if (ind <0) {
-                    this.#cardListEnemie[i].setX(this.listeEmplacements[i].getX());
-                    this.#cardListEnemie[i].setY(this.listeEmplacements[i].getY());
+                if (ind < 0) {
+                    this.#cardListEnemie[i].setX(
+                        this.listeEmplacements[i].getX()
+                    );
+                    this.#cardListEnemie[i].setY(
+                        this.listeEmplacements[i].getY()
+                    );
                 }
-                
             }
-
-
         }
     }
 
@@ -323,11 +341,21 @@ class Plateau {
             card.setPlayed();
             card.setPos(pos);
             pA.retirerPA(card.getCout());
-            let distance = card.calculMoveDistance(this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY(),1);
-            card.moveCard(distance['x'],distance['y'],this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY());
+            
+            let distance = card.calculMoveDistance(
+                this.listeEmplacements[card.getPos() + 4].getX(),
+                this.listeEmplacements[card.getPos() + 4].getY(),
+                0.5
+            );
+            card.moveCard(
+                distance["x"],
+                distance["y"],
+                this.listeEmplacements[card.getPos() + 4].getX(),
+                this.listeEmplacements[card.getPos() + 4].getY()
+            );
+
             this.#cardListJoueur[pos] = card;
-        }
-        else {
+        } else {
             card.setX(this.listeEmplacements[pos].getX());
             card.setY(this.listeEmplacements[pos].getY());
             card.setPos(pos);
@@ -338,8 +366,7 @@ class Plateau {
     getCard(pos, joueur) {
         if (joueur) {
             return this.#cardListJoueur[pos];
-        }
-        else {
+        } else {
             return this.#cardListEnemie[pos];
         }
     }
@@ -351,61 +378,71 @@ class Plateau {
 
         var i = 0;
 
-        var fonctionAtk = ()=>{
-            if (i<this.#cardListJoueur.length) {
-                let joueurAttaque = new Promise((resolve) =>{
-                    console.log('tour ' + i);
-                    console.log('attaque joueur');
+        var fonctionAtk = () => {
+            if (i < this.#cardListJoueur.length) {
+                let joueurAttaque = new Promise((resolve) => {
+                    console.log("tour " + i);
+                    console.log("attaque joueur");
                     if (this.#cardListJoueur[i] != undefined) {
                         this.#cardListJoueur[i].attakAnimation();
-                    }
-                    else{
+                    } else {
                         resolve();
                     }
-                    var verif = ()=>{
+                    var verif = () => {
                         if (carteFinTour) {
-                            console.log('fin tour joueur');
+                            console.log("fin tour joueur");
                             resolve();
-                        }else{
-                            setTimeout(() => {verif()}, 100);
+                        } else {
+                            setTimeout(() => {
+                                verif();
+                            }, 100);
                         }
-                    }
+                    };
                     verif();
-                })
-                joueurAttaque.then(()=>{
+                });
+                joueurAttaque.then(() => {
                     if (this.#cardListJoueur[i] != undefined) {
-                        this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
+                        this.#cardListJoueur[i].tourCarte(
+                            this.#cardListJoueur,
+                            this.#cardListEnemie,
+                            true
+                        );
                     }
                     carteFinTour = false;
-        
-                    let ennemieAttaque = new Promise((resolve) =>{
-                        console.log('attaque enemie');
+
+                    let ennemieAttaque = new Promise((resolve) => {
+                        console.log("attaque enemie");
                         if (this.#cardListEnemie[i] != undefined) {
-                            console.log('entre dans anim enemie');
+                            console.log("entre dans anim enemie");
                             console.log(this.#cardListEnemie[i]);
                             this.#cardListEnemie[i].attakAnimation();
-                        }
-                        else{
-                            console.log('va dans le resolve undefined');
+                        } else {
+                            console.log("va dans le resolve undefined");
                             resolve();
                         }
-                        var verif = ()=>{
+                        var verif = () => {
                             if (carteFinTour) {
-                                console.log('fin tour enemie');
+                                console.log("fin tour enemie");
                                 resolve();
-                            }else{
-                                setTimeout(() => {verif()}, 100);
+                            } else {
+                                setTimeout(() => {
+                                    verif();
+                                }, 100);
                             }
-                        }
+                        };
                         verif();
-                    })
-                    ennemieAttaque.then(()=>{
-                        console.log('resove enemie');
+                    });
+                    ennemieAttaque.then(() => {
+                        console.log("resove enemie");
                         if (this.#cardListEnemie[i] != undefined) {
-                            this.#cardListEnemie[i].tourCarte(this.#cardListEnemie, this.#cardListJoueur, false);
+                            this.#cardListEnemie[i].tourCarte(
+                                this.#cardListEnemie,
+                                this.#cardListJoueur,
+                                false
+                            );
                         }
                         carteFinTour = false;
-        
+
                         for (let j = 0; j < this.#cardListJoueur.length; j++) {
                             if (this.#cardListJoueur[j] != undefined) {
                                 if (this.#cardListJoueur[j].getHp() <= 0) {
@@ -418,27 +455,24 @@ class Plateau {
                                         this.#cardListEnemie[j] = undefined;
                                     }
                             }
-            
                         }
                         i++;
                         fonctionAtk();
-                    })
-                })
-            }
-            else{
-                console.log('fin total');
-                if(this.pvJauge > 10 || this.pvJauge <1){
+                    });
+                });
+            } else {
+                console.log("fin total");
+                if (this.pvJauge > 10 || this.pvJauge < 1) {
                     console.log("partie finie");
                     finPartie();
                 }
             }
-        }
+        };
 
         pA.ajoutPA(1);
         fonctionAtk();
-        
 
-        console.log('entré dans action');
+        console.log("entré dans action");
         /*for (let i = 0; i < this.#cardListJoueur.length; i++) {
             console.log('tour' + i);
             console.log('j');
@@ -469,51 +503,60 @@ class Plateau {
             }
 
         }*/
-        
     }
 }
 
-class JaugeVie{
+class JaugeVie {
     #x;
     #y;
     #width;
     #height;
     constructor() {
-        this.#x = canvas.width/8;
-        this.#y = canvas.height / 7;
-        this.#height = canvas.height/2;
+        this.#x = canvas.width / 8;
+        this.#y = plateau.y;
+        this.#height = canvas.height / 2;
         this.#width = cardWidth / 7;
     }
 
-    draw(){
-        this.#x = canvas.width/8;
-        this.#y = canvas.height / 7;
-        this.#height = canvas.height/2;
+    draw() {
+        this.#x = canvas.width / 8;
+        this.#y = plateau.y;
+        this.#height = plateau.height;
         this.#width = cardWidth / 7;
 
         context.lineWidth = lineWidth;
-        context.strokeStyle = 'gray';
+        context.strokeStyle = "gray";
         context.strokeRect(this.#x, this.#y, this.#width, this.#height);
-        let increment = this.#height/10;
-        context.fillStyle = 'gray';
+        let increment = this.#height / 10;
+        context.fillStyle = "gray";
         context.beginPath();
         for (let i = 0; i <= 10; i++) {
-            context.moveTo(this.#x + this.#width, this.#y + (i*increment));
-            if (i===0 || i===5 || i===10) {
-                context.lineTo(this.#x + 4*this.#width, this.#y + (i*increment));
-            }else{
-                context.lineTo(this.#x + 2*this.#width, this.#y + (i*increment));
+            context.moveTo(this.#x + this.#width, this.#y + i * increment);
+            if (i === 0 || i === 5 || i === 10) {
+                context.lineTo(
+                    this.#x + 4 * this.#width,
+                    this.#y + i * increment
+                );
+            } else {
+                context.lineTo(
+                    this.#x + 2 * this.#width,
+                    this.#y + i * increment
+                );
             }
-            
         }
         context.closePath();
         context.stroke();
 
-        let proportionBleu = (this.#height/10)*(10-plateau.pvJauge);
-        context.fillStyle = 'lightblue';
-        context.fillRect(this.#x,this.#y,this.#width,proportionBleu);
-        context.fillStyle = 'red';
-        context.fillRect(this.#x,this.#y+proportionBleu,this.#width,this.#height-proportionBleu);
+        let proportionBleu = (this.#height / 10) * (10 - plateau.pvJauge);
+        context.fillStyle = "lightblue";
+        context.fillRect(this.#x, this.#y, this.#width, proportionBleu);
+        context.fillStyle = "red";
+        context.fillRect(
+            this.#x,
+            this.#y + proportionBleu,
+            this.#width,
+            this.#height - proportionBleu
+        );
     }
 }
 
@@ -533,7 +576,7 @@ class Emplacement {
         this.#y = y;
         this.#width = width;
         this.#height = height;
-        this.#color = 'white';
+        this.#color = "white";
         this.#isMouseHover = false;
         this.#isFull = false;
         this.#pos = pos;
@@ -546,18 +589,17 @@ class Emplacement {
         this.#width = width;
         this.#height = height;
         if (this.#isMouseHover && !this.#isFull && this.#pos > 3) {
-            this.#color = 'yellow';
+            this.#color = "yellow";
         } else {
-            this.#color = 'white';
+            this.#color = "white";
         }
 
         if (this.#placedCart != undefined) {
             let i = inAnimationCard.indexOf(this.#placedCart);
-            if (i <0) {
+            if (i < 0) {
                 this.#placedCart.setX(this.#x);
                 this.#placedCart.setY(this.#y);
             }
-            
         }
         context.lineWidth = lineWidth;
         context.strokeStyle = this.#color;
@@ -588,7 +630,6 @@ class Emplacement {
     }
     setFree() {
         this.#isFull = false;
-
     }
     getWidth() {
         return this.#width;
@@ -599,7 +640,12 @@ class Emplacement {
 
     mouseHover(x, y) {
         if (!this.#isFull) {
-            if (x > this.#x && x < this.#x + this.#width && y > this.#y && y < this.#y + this.#height) {
+            if (
+                x > this.#x &&
+                x < this.#x + this.#width &&
+                y > this.#y &&
+                y < this.#y + this.#height
+            ) {
                 this.#isMouseHover = true;
                 //console.log(selectedCard);
             } else {
@@ -609,7 +655,13 @@ class Emplacement {
     }
 
     mouseClick() {
-        if (!this.#isFull && selectedCard != undefined && this.#pos > 3 && canPlay && inAnimationCard.length ==0) {
+        if (
+            !this.#isFull &&
+            selectedCard != undefined &&
+            this.#pos > 3 &&
+            canPlay &&
+            inAnimationCard.length == 0
+        ) {
             inAnimationCard.push(selectedCard);
             this.#placedCart = selectedCard;
             main.retirerCarte(selectedCard);
@@ -617,13 +669,12 @@ class Emplacement {
             //selectedCard.setPos(this.#pos - 4);
             plateau.addCard(selectedCard, this.#pos - 4, true);
             this.#isFull = true;
-            
+
             selectedCard = undefined;
             //canPlay = false;
             console.log("test");
         }
     }
-
 }
 
 class Carte {
@@ -642,16 +693,17 @@ class Carte {
     #cout;
     #pos;
     #PlayerCard;
+    #imgsrc;
 
-    constructor(imgSrc, x, y, nom, hp, atk, cout, playerCard) {
+
+    constructor(imgSrc, nom, hp, atk, cout, effet) {
         this.#img = new Image();
-        this.#img.src = imgSrc;
+        this.#imgsrc = imgSrc;
+        this.#img.src = "./images/"+imgSrc;
         //console.log(this.#img.src);
         /*this.#img.onload = ()=>{
             context.drawImage(this.#img,0,0);
         };*/
-        this.#x = x;
-        this.#y = y;
         this.#width = cardWidth;
         this.#height = cardHeight;
         this.#nom = nom;
@@ -660,12 +712,16 @@ class Carte {
         this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
-        this.#effet = new Effet();
         this.#cout = cout;
+        this.#effet = effet;
+    }
+
+    visible(x, y, playerCard){
+        this.#x = x;
+        this.#y = y;
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
-
     }
 
     draw() {
@@ -674,8 +730,6 @@ class Carte {
             if (i > -1) {
                 drawElement.splice(i, 1);
             }
-
-
         }
 
         //console.log(this.#x);
@@ -685,17 +739,41 @@ class Carte {
             this.#height = cardHeight;
         }
 
+        context.drawImage(
+            imgFondCarte,
+            this.#x,
+            this.#y,
+            this.#width,
+            this.#height,
+            
+        )
 
-        context.fillStyle = 'green';
-        context.fillRect(this.#x, this.#y, this.#width, this.#height);
-        context.fillStyle = 'black';
-        context.textAlign = 'center';
+        context.fillStyle = "black";
+        context.textAlign = "center";
         context.font = canvas.width / 100;
-        context.fillText(this.#nom, this.#x + this.#width / 2, this.#y + this.#height / 8);
-        context.drawImage(this.#img, this.#x, this.#y + this.#height / 4, this.#width, this.#height / 3);
+        context.fillText(
+            this.#nom,
+            this.#x + this.#width / 2,
+            this.#y + this.#height / 10
+        );
+        context.drawImage(
+            this.#img,
+            this.#x + (this.#width/1.35)/6,
+            this.#y + this.#height / 7,
+            this.#width/1.3,
+            this.#width/1.50,
+        );
 
-        context.fillText(this.#hp + 'hp', this.#x + this.#width / 5.5, this.#y + this.#height / 1.4);
-        context.fillText(this.#atk + 'atk', this.#x + this.#width / 1.2, this.#y + this.#height / 1.05);
+        context.fillText(
+            this.#hp + "hp",
+            this.#x + this.#width / 5.5,
+            this.#y + this.#height / 1.3
+        );
+        context.fillText(
+            this.#atk + "atk",
+            this.#x + this.#width / 1.2,
+            this.#y + this.#height / 1.05
+        );
 
         /*this.#img.onload = ()=>{
             console.log(this.#x);
@@ -711,7 +789,12 @@ class Carte {
 
     mouseHover(x, y) {
         if (!this.#isPlayed) {
-            if (x > this.#x && x < this.#x + this.#width && y > this.#y && y < this.#y + this.#height) {
+            if (
+                x > this.#x &&
+                x < this.#x + this.#width &&
+                y > this.#y &&
+                y < this.#y + this.#height
+            ) {
                 if (!this.#isMouseHover) {
                     this.#width = cardWidth * 1.05;
                     this.#height = cardHeight * 1.05;
@@ -721,7 +804,6 @@ class Carte {
                 this.#isMouseHover = false;
             }
         }
-
     }
 
     mouseClick() {
@@ -736,6 +818,17 @@ class Carte {
         return this.#x;
     }
 
+    getImageSrc(){
+        return this.#imgsrc;
+    }
+
+    getNom(){
+        return this.#nom;
+    }
+
+    getEffet(){
+        return this.#effet;
+    }
     getY() {
         return this.#y;
     }
@@ -753,7 +846,7 @@ class Carte {
         this.#height = height;
     }
     setPlayed() {
-        console.log('set played');
+        console.log("set played");
         this.#isPlayed = true;
     }
 
@@ -791,7 +884,7 @@ class Carte {
     }
 
     getHpmax() {
-        return this.#hpmax
+        return this.#hpmax;
     }
 
     getCout(){
@@ -802,24 +895,36 @@ class Carte {
     }
 
     tourCarte(listCarteJoueur, listCarteEnemie, joueur) {
-        console.log('est dans tourCarte');
-        console.log('liste J');
+        console.log("est dans tourCarte");
+        console.log("liste J");
         console.log(listCarteJoueur);
-        console.log('liste e');
+        console.log("liste e");
         console.log(listCarteEnemie);
         let intensite;
-        let listCarteImpacter = this.#effet.getCartImpacter(listCarteJoueur, listCarteEnemie, this.#pos);
-        console.log('liste carte impacté');
+        let listCarteImpacter = this.#effet.getCartImpacter(
+            listCarteJoueur,
+            listCarteEnemie,
+            this.#pos
+        );
+        console.log("liste carte impacté");
         console.log(listCarteImpacter);
         for (let i = 0; i < listCarteImpacter.length; i++) {
             intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
             if (intensite < 0 && listCarteImpacter[i] != null) {
-                intensite = this.#effet.soin(this, listCarteImpacter[i], intensite);
-                this.soin(listCarteImpacter[1], intensite)
-            }
-            else {
-                if (listCarteImpacter[i] != null) intensite = listCarteImpacter[i].#effet.defence(listCarteImpacter[i], this, intensite);
-                this.attaque(listCarteImpacter[i], intensite, joueur)
+                intensite = this.#effet.soin(
+                    this,
+                    listCarteImpacter[i],
+                    intensite
+                );
+                this.soin(listCarteImpacter[1], intensite);
+            } else {
+                if (listCarteImpacter[i] != null)
+                    intensite = listCarteImpacter[i].#effet.defence(
+                        listCarteImpacter[i],
+                        this,
+                        intensite
+                    );
+                this.attaque(listCarteImpacter[i], intensite, joueur);
             }
         }
     }
@@ -832,90 +937,85 @@ class Carte {
             carteImpacter.setHp(Math.max(0, carteImpacter.getHp() - intensite));
             if (carteImpacter.getHp() == 0) {
                 if (carteImpacter.isPlayerCard()) {
-                    plateau.listeEmplacements[carteImpacter.getPos() + 4].setFree();
+                    plateau.listeEmplacements[
+                        carteImpacter.getPos() + 4
+                    ].setFree();
                 }
             }
-        }
-        else {
+        } else {
             if (joueur) plateau.pvJauge += intensite;
             else plateau.pvJauge -= intensite;
         }
-
     }
 
     //pour l'instant le temps est considéré en seconde
-    moveCard(xDistancePerFrame,yDistancePerFrame,x,y){
+    moveCard(xDistancePerFrame, yDistancePerFrame, x, y) {
         if (timer > interval) {
             if (this.x != x) {
-                if (this.#x-x<2 && this.#x-x>-2) {
+                if (this.#x - x < 2 && this.#x - x > -2) {
                     this.#x = x;
-                }else{
+                } else {
                     this.#x -= xDistancePerFrame;
                 }
-                
             }
             if (this.#y != y) {
-                if (this.#y-y<2 && this.#y-y>-2) {
+                if (this.#y - y < 2 && this.#y - y > -2) {
                     this.#y = y;
-                }else{
+                } else {
                     this.#y -= yDistancePerFrame;
                 }
-                
             }
         }
 
         if (this.#x != x || this.#y != y) {
-            requestAnimationFrame(() =>{
-                this.moveCard(xDistancePerFrame,yDistancePerFrame,x,y)}
-                )
-        }else{
+            requestAnimationFrame(() => {
+                this.moveCard(xDistancePerFrame, yDistancePerFrame, x, y);
+            });
+        } else {
             let i = inAnimationCard.indexOf(this);
-            if (i>-1) {
-                inAnimationCard.splice(i,1);
+            if (i > -1) {
+                inAnimationCard.splice(i, 1);
             }
-            console.log('fini');
+            console.log("fini");
         }
     }
-    
-    
-    calculMoveDistance(x,y,time){
+
+    calculMoveDistance(x, y, time) {
         let distance = {
-            'x':(this.#x - x)/(60*time),
-            'y':(this.#y - y)/(60*time),
-        }
+            x: (this.#x - x) / (60 * time),
+            y: (this.#y - y) / (60 * time),
+        };
         return distance;
     }
 
-    attakAnimation(){
-        console.log('entré dans animation');
-        var distanceY = cardHeight/(60*0.05);
+    attakAnimation() {
+        console.log("entré dans animation");
+        var distanceY = cardHeight / (60 * 0.05);
         if (this.#PlayerCard) {
             var y = this.#y - cardHeight;
-        }else{
+        } else {
             var y = this.#y + cardHeight;
         }
-        
 
         var deplacementFin = false;
 
         var fonc = (direction) => {
-            console.log('entré dans la fonction');
+            console.log("entré dans la fonction");
             if (timer > interval) {
                 if (this.#y != y) {
-                    if (this.#y-y<2 && this.#y-y>-2) {
+                    if (this.#y - y < 2 && this.#y - y > -2) {
                         this.#y = y;
-                    }else{
-                        if (direction === 'up') {
+                    } else {
+                        if (direction === "up") {
                             if (this.#PlayerCard) {
                                 this.#y -= distanceY;
-                            }else{
+                            } else {
                                 this.#y += distanceY;
                             }
-                            
-                        }else{
+                        } else {
                             if (this.#PlayerCard) {
                                 this.#y += distanceY;
-                            }else{
+                            } else {
                                 this.#y -= distanceY;
                             }
                         }
@@ -923,55 +1023,53 @@ class Carte {
                 }
             }
             if (this.#y != y) {
-                requestAnimationFrame(() =>{
-                    fonc(direction)}
-                    )
-            }else{
-
-                if (direction === 'down') {
+                requestAnimationFrame(() => {
+                    fonc(direction);
+                });
+            } else {
+                if (direction === "down") {
                     let i = inAnimationCard.indexOf(this);
-                    if (i>-1) {
-                        inAnimationCard.splice(i,1);
+                    if (i > -1) {
+                        inAnimationCard.splice(i, 1);
                     }
                     carteFinTour = true;
                 }
-                console.log('fini fini');
-                deplacementFin=true;           
+                console.log("fini fini");
+                deplacementFin = true;
             }
-        }
+        };
         var promise = new Promise((resolve) => {
-            console.log('entré dans la promesse');
+            console.log("entré dans la promesse");
             let i = inAnimationCard.indexOf(this);
-                if (i<0) {
-                    console.log('ajout dans la liste');
-                    inAnimationCard.push(this);
-                }
-            
-            fonc('up');
-            let verif = () =>{
+            if (i < 0) {
+                console.log("ajout dans la liste");
+                inAnimationCard.push(this);
+            }
+
+            fonc("up");
+            let verif = () => {
                 if (deplacementFin) {
                     resolve();
-                }else{
-                    setTimeout(() => {verif()}, 100);
+                } else {
+                    setTimeout(() => {
+                        verif();
+                    }, 100);
                 }
-            }
-            verif()
+            };
+            verif();
         });
-        promise.then(()=>{
-            console.log('azertyfdsdfghgdsdfgh');
+        promise.then(() => {
+            console.log("azertyfdsdfghgdsdfgh");
             if (this.#PlayerCard) {
                 y = this.#y + cardHeight;
-            }else{
-                y = this.#y - cardHeight; 
+            } else {
+                y = this.#y - cardHeight;
             }
-            
-            fonc('down');
-        })
+
+            fonc("down");
+        });
     }
-
-
 }
-
 
 class Main {
     #x;
@@ -988,20 +1086,19 @@ class Main {
         this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
         this.#listeCartes = [];
-        this.#cardGap = canvas.width / 8 * 0.2;
+        this.#cardGap = (canvas.width / 8) * 0.2;
         this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
     }
 
     draw() {
         this.#x = canvas.width / 4;
-        this.#y = canvas.height / 1.3;
+        this.#y = canvas.height / 1.4;
         this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
-        this.#cardGap = canvas.width / 8 * 0.2;
+        this.#cardGap = (canvas.width / 8) * 0.2;
         this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
-        context.fillStyle = 'gray';
+        context.fillStyle = "gray";
         context.fillRect(this.#x, this.#y, this.#width, this.#height);
-
     }
 
     reajusterCartes() {
@@ -1014,17 +1111,19 @@ class Main {
 
             let i;
             for (i = 1; i < this.#listeCartes.length; i++) {
-                
                 nouvCarte = this.#listeCartes[i];
-                for (let index = i; index >=0; index--) {
+                for (let index = i; index >= 0; index--) {
                     carte = this.#listeCartes[index];
-                    carte.setX(carte.getX() - (cardWidth/2 + this.#cardGap/2));
+                    carte.setX(
+                        carte.getX() - (cardWidth / 2 + this.#cardGap / 2)
+                    );
                 }
-                nouvCarte.setX(this.#listeCartes[i-1].getX() + cardWidth + this.#cardGap);
+                nouvCarte.setX(
+                    this.#listeCartes[i - 1].getX() + cardWidth + this.#cardGap
+                );
                 nouvCarte.setY(this.#y);
             }
         }
-
     }
 
     getListeCartes() {
@@ -1037,19 +1136,39 @@ class Main {
         for (let i = 0; i < this.#listeCartes.length; i++) {
             if (this.#listeCartes[i] != carte) {
                 if (carteTrouvee == false) {
-                    let tempX = this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2);
-                    distance = this.#listeCartes[i].calculMoveDistance(tempX, this.#listeCartes[i].getY(),0.5);
-                    this.#listeCartes[i].moveCard(distance['x'],distance['y'],tempX, this.#y);
+                    let tempX =
+                        this.#listeCartes[i].getX() +
+                        (cardWidth / 2 + this.#cardGap / 2);
+                    distance = this.#listeCartes[i].calculMoveDistance(
+                        tempX,
+                        this.#listeCartes[i].getY(),
+                        0.5
+                    );
+                    this.#listeCartes[i].moveCard(
+                        distance["x"],
+                        distance["y"],
+                        tempX,
+                        this.#y
+                    );
                     //this.#listeCartes[i].setX(this.#listeCartes[i].getX() + (cardWidth / 2 + this.#cardGap / 2));
-                }
-                else {
-                    let tempX = this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2);
-                    distance = this.#listeCartes[i].calculMoveDistance(tempX, this.#listeCartes[i].getY(),0.5);
-                    this.#listeCartes[i].moveCard(distance['x'],distance['y'],tempX, this.#y);
+                } else {
+                    let tempX =
+                        this.#listeCartes[i].getX() -
+                        (cardWidth / 2 + this.#cardGap / 2);
+                    distance = this.#listeCartes[i].calculMoveDistance(
+                        tempX,
+                        this.#listeCartes[i].getY(),
+                        0.5
+                    );
+                    this.#listeCartes[i].moveCard(
+                        distance["x"],
+                        distance["y"],
+                        tempX,
+                        this.#y
+                    );
                     //this.#listeCartes[i].setX(this.#listeCartes[i].getX() - (cardWidth / 2 + this.#cardGap / 2));
                 }
-            }
-            else{
+            } else {
                 console.log(this.#listeCartes);
                 carteTrouvee = true;
                 this.#listeCartes.splice(i, 1);
@@ -1069,37 +1188,40 @@ class Main {
         inAnimationCard.push(nouvCarte);
         if (this.#listeCartes.length == 0) {
             //console.log("feur");
-            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y,1);
-            nouvCarte.moveCard(distance['x'],distance['y'],this.#cardPos, this.#y);
-            console.log('move');
+            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y, 0.5);
+            nouvCarte.moveCard(
+                distance["x"],
+                distance["y"],
+                this.#cardPos,
+                this.#y
+            );
+            console.log("move");
             //nouvCarte.setX(this.#cardPos);
             //nouvCarte.setY(this.#y);
             console.log(nouvCarte.getX());
             this.#listeCartes.push(nouvCarte);
-        }
-        else {
+        } else {
             for (let i = 0; i < this.#listeCartes.length; i++) {
                 let carte = this.#listeCartes[i];
                 //console.log(carte);
-                let tempX = carte.getX() - (cardWidth/2 + this.#cardGap/2);
-                distance = carte.calculMoveDistance(tempX, carte.getY(),1);
-                carte.moveCard(distance['x'],distance['y'],tempX, this.#y);
+                let tempX = carte.getX() - (cardWidth / 2 + this.#cardGap / 2);
+                distance = carte.calculMoveDistance(tempX, carte.getY(), 0.5);
+                carte.moveCard(distance["x"], distance["y"], tempX, this.#y);
                 //carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
             //nouvCarte.setX(this.#listeCartes[this.#listeCartes.length - 1].getX() + cardWidth + this.#cardGap);
             //nouvCarte.setY(this.#y);
 
-            let tempX = this.#listeCartes[this.#listeCartes.length - 1].getX()  + (cardWidth/2 + this.#cardGap/2);
-            distance = nouvCarte.calculMoveDistance(tempX, this.#y,1);
-            nouvCarte.moveCard(distance['x'],distance['y'],tempX, this.#y);
+            let tempX =
+                this.#listeCartes[this.#listeCartes.length - 1].getX() +
+                (cardWidth / 2 + this.#cardGap / 2);
+            distance = nouvCarte.calculMoveDistance(tempX, this.#y, 0.5);
+            nouvCarte.moveCard(distance["x"], distance["y"], tempX, this.#y);
             this.#listeCartes.push(nouvCarte);
         }
     }
 
-    refreshPosInfo() {
-
-    }
-
+    refreshPosInfo() {}
 }
 
 class Pioche {
@@ -1111,41 +1233,62 @@ class Pioche {
     constructor() {
         this.#x = canvas.width - canvas.width / 4;
         this.#y = canvas.height / 1.3;
-        this.#width = plateau.width / 4 * 0.8;
-        this.#height = plateau.height / 2 * 0.8;
+        this.#width = (plateau.width / 4) * 0.8;
+        this.#height = (plateau.height / 2) * 0.8;
         elements.push(this);
         drawElement.push(this);
     }
 
-    getX() { return this.#x; }
-    getY() { return this.#y; }
-    getWidth() { return this.#width };
-    getHeight() { return this.#height; }
+    getX() {
+        return this.#x;
+    }
+    getY() {
+        return this.#y;
+    }
+    getWidth() {
+        return this.#width;
+    }
+    getHeight() {
+        return this.#height;
+    }
 
     draw() {
         this.#x = canvas.width - canvas.width / 6;
         this.#y = canvas.height / 3;
-        this.#width = plateau.width / 4 * 0.8;
-        this.#height = plateau.height / 2 * 0.8;
+        this.#width = (plateau.width / 4) * 0.8;
+        this.#height = (plateau.height / 2) * 0.8;
 
-        context.fillStyle = 'gray';
+        context.fillStyle = "gray";
         context.fillRect(this.#x, this.#y, this.#width, this.#height);
-        context.fillStyle = 'darkgray';
-        context.fillRect(this.#x, this.#y + this.#height / 4, this.#width, this.#height / 3);
-        context.fillStyle = 'black';
-        context.textAlign = 'center';
-        context.font = canvas.width / 50 + 'px Arial';
-        context.fillText('PIOCHE', this.#x + this.#width / 2, this.#y + this.#height / 2.3);
+        context.fillStyle = "darkgray";
+        context.fillRect(
+            this.#x,
+            this.#y + this.#height / 4,
+            this.#width,
+            this.#height / 3
+        );
+        context.fillStyle = "black";
+        context.textAlign = "center";
+        context.font = canvas.width / 50 + "px Arial";
+        context.fillText(
+            "PIOCHE",
+            this.#x + this.#width / 2,
+            this.#y + this.#height / 2.3
+        );
     }
 
-    mouseHover() {
-
-    }
+    mouseHover() {}
 
     mouseClick() {
-        if (main.getListeCartes().length < 5 && canDraw && inAnimationCard.length ==0) {
-            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1, 1, true);
-            main.ajoutCarte(carte);
+        if (
+            main.getListeCartes().length < 5 &&
+            canDraw &&
+            inAnimationCard.length == 0
+        ) {
+            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            newCard.visible(this.#x, this.#y, true);
+            main.ajoutCarte(newCard);
             canDraw = false;
         }
     }
@@ -1167,13 +1310,12 @@ class EndTurnButton {
     }
 
     draw() {
-
         this.#x = canvas.width - canvas.width / 6;
         this.#y = canvas.height / 1.2;
         this.#width = canvas.width / 8;
         this.#height = canvas.height / 10;
 
-        context.fillStyle = 'gray';
+        context.fillStyle = "gray";
         context.beginPath();
         context.moveTo(this.#x, this.#y);
         context.lineTo(this.#x + this.#width / 1.5, this.#y);
@@ -1183,22 +1325,23 @@ class EndTurnButton {
         context.lineTo(this.#x, this.#y);
         context.closePath();
         context.fill();
-        context.font = canvas.width / 65 + 'px Arial';
-        context.fillStyle = 'black';
-        context.fillText('Terminer le tour', this.#x + this.#width / 2.2, this.#y + this.#height / 1.8);
+        context.font = canvas.width / 65 + "px Arial";
+        context.fillStyle = "black";
+        context.fillText(
+            "Terminer le tour",
+            this.#x + this.#width / 2.2,
+            this.#y + this.#height / 1.8
+        );
     }
 
-    mouseHover() {
-
-    }
+    mouseHover() {}
 
     mouseClick() {
-        if (inAnimationCard.length ==0) {
+        if (inAnimationCard.length == 0) {
             endTurn = true;
             ia.play();
             plateau.action();
         }
-        
     }
 
     getX() {
@@ -1216,34 +1359,40 @@ class EndTurnButton {
     }
 }
 
-
 class Ia {
     #hp;
     #cardList;
     constructor() {
         this.#hp = 10;
-        this.#cardList = [{ 'name': 'card1', 'atk': 1, 'hp': 5 },
-        { 'name': 'card2', 'atk': 1, 'hp': 5 },
-        { 'name': 'card3', 'atk': 1, 'hp': 5 },
-        { 'name': 'card4', 'atk': 1, 'hp': 5 }];
+        this.#cardList = [
+            { name: "card1", atk: 1, hp: 5 },
+            { name: "card2", atk: 1, hp: 5 },
+            { name: "card3", atk: 1, hp: 5 },
+            { name: "card4", atk: 1, hp: 5 },
+        ];
     }
 
     play() {
-        let card = this.#cardList[Math.floor(Math.random() * this.#cardList.length)];
+        let card =
+            this.#cardList[Math.floor(Math.random() * this.#cardList.length)];
         let availablePlace = [];
         for (let i = 0; i < 4; i++) {
             if (plateau.getCard(i) == undefined) {
                 console.log(i);
                 availablePlace.push(i);
             }
-
         }
         if (availablePlace.length > 0) {
-            let pos = availablePlace[Math.floor(Math.random() * availablePlace.length)];
-            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk, 0, false);
+            let pos =
+                availablePlace[
+                    Math.floor(Math.random() * availablePlace.length)
+                ];
+            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            newCard.visible(1, 1, false);
             plateau.addCard(newCard, pos);
-        }
 
+        }
     }
 }
 
@@ -1327,14 +1476,14 @@ class pointsAction {
 /// - Effets - ////////////////////////////////////////////////////////////////
 
 class Effet {
-    nomEffet;
+    nomEffet = "Effet par défaut";
+    idEffet = 0; 
     imgEffet;
     constructor() {
-        this.nomEffet = "Effet par défaut";
     }
 
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
-        console.log('est dans carteImpacter');
+        console.log("est dans carteImpacter");
         console.log(pos);
         console.log(listCarteEnemie[pos]);
         let listCarteReturn = new Array(0);
@@ -1355,53 +1504,49 @@ class Effet {
     }
 }
 
-
 class Vol extends Effet {
     constructor() {
-        this.nomEffet = "vol"
+        super();
+        this.nomEffet = "vol";
+        this.idEffet = 1; 
     }
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
     }
 }
 
-class bdoRequest {
+/// - API - ////////////////////////////////////////////////////////////////
 
-    constructor(){}
+async function requestToBDD(requeste, parameter) {
+    let requestFile;
+    let requestParameter;
+    switch (requeste) {
+        case REQUEST_ALL_CARTE:
+            requestFile = "carteJson.php";
+            break;
 
-    getAllCarte(){
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function(){
-            
-            if(this.readyState == 4 && this.status == 200){
-                console.log(this.response);
-            }
-            else if (this.readyState ==4){
-                alert("errer bdd");
-            }
-        };
-        xhr.open("POST", "http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/carteJson.php", true);
-        xhr.responseType = "json";
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.send();
-        return this.response;
+        case REQUEST_ALL_EFFET:
+            requestFile = "effetJson.php";
+            break;
+
+        default:
+            return null;
     }
+    let request = await fetch(`http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/${requestFile}`, { method: "post", });
+    return await request.json();
 
-    getAllEffet(){
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function(){
-            
-            if(this.readyState == 4 && this.status == 200){
-                console.log(this.response);
-            }
-            else if (this.readyState ==4){
-                alert("errer bdd");
-            }
-        };
-        xhr.open("POST", "http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/effetJson.php", true);
-        xhr.responseType = "json";
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.send();
-        return this.response;
+}
+
+function getEffet(effetid){
+    switch (effetid) {
+        case null:
+            return new Effet();
+            break;
+        case 1:
+            return new Vol();
+            break;
+        default:
+            return new Effet();
+            break;
     }
 }
