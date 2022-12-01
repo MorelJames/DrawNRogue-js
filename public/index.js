@@ -147,7 +147,6 @@ function lancerPartie() {
     //plateau.addCard(carteTest,0);
 
     //elements.push(pioche);
-
     drawAll(0);
     //carte.animate(50,50,100,200);
 
@@ -227,12 +226,13 @@ function resize() {
 window.addEventListener("resize", resize);
 
 function finPartie() {
-    canvas.style.display = "none";
-    finPartiePage.style.display = "flex";
-    let p = document.getElementById("message");
-
-    if (plateau.jaugeVie < 1) {
-        p.innerText = "Victoire";
+    canvas.style.display = 'none';
+    finPartiePage.style.display = 'flex';
+    let p = document.getElementById('message');
+    
+    console.log(plateau.jaugeVie);
+    if (plateau.pvJauge>9) {
+        p.innerText = 'Victoire';
         document.body.style.backgroundColor = "darkgreen";
     } else {
         p.innerText = "Défaite";
@@ -338,6 +338,7 @@ class Plateau {
 
     addCard(card, pos, joueur) {
         if (joueur) {
+            console.log('add carte joueur');
             card.setPlayed();
             card.setPos(pos);
             pA.retirerPA(card.getCout());
@@ -458,11 +459,12 @@ class Plateau {
                         }
                         i++;
                         fonctionAtk();
-                    });
-                });
-            } else {
-                console.log("fin total");
-                if (this.pvJauge > 10 || this.pvJauge < 1) {
+                    })
+                })
+            }
+            else{
+                console.log('fin total');
+                if(this.pvJauge > 9 || this.pvJauge <1){
                     console.log("partie finie");
                     finPartie();
                 }
@@ -712,6 +714,7 @@ class Carte {
         this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
+        this.#effet = effet;
         this.#cout = cout;
         this.#effet = effet;
     }
@@ -719,6 +722,7 @@ class Carte {
     visible(x, y, playerCard){
         this.#x = x;
         this.#y = y;
+
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
@@ -887,6 +891,14 @@ class Carte {
         return this.#hpmax;
     }
 
+    getImg(){
+        return this.#img;
+    }
+    getNom(){
+        return this.#nom;
+    }
+
+
     getCout(){
         return this.#cout;
     }
@@ -909,7 +921,7 @@ class Carte {
         console.log("liste carte impacté");
         console.log(listCarteImpacter);
         for (let i = 0; i < listCarteImpacter.length; i++) {
-            intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
+            intensite = this.#effet.actionCarte(listCarteJoueur, listCarteEnemie, this.#pos);
             if (intensite < 0 && listCarteImpacter[i] != null) {
                 intensite = this.#effet.soin(
                     this,
@@ -1390,6 +1402,7 @@ class Ia {
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
             let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
             newCard.visible(1, 1, false);
+
             plateau.addCard(newCard, pos);
 
         }
@@ -1479,6 +1492,7 @@ class Effet {
     nomEffet = "Effet par défaut";
     idEffet = 0; 
     imgEffet;
+
     constructor() {
     }
 
@@ -1491,8 +1505,8 @@ class Effet {
         return listCarteReturn;
     }
 
-    actionCarte(carteJoueur, carteImpacter) {
-        return carteJoueur.getAtk();
+    actionCarte(listCarteJoueur, listCarteEnemie, pos) {
+        return listCarteJoueur[pos].getAtk();
     }
 
     defence(carteJoueur, carteImpacter, intensite) {
@@ -1512,6 +1526,36 @@ class Vol extends Effet {
     }
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
+    }
+}
+
+
+class Duplication extends Effet{
+    constructor(){
+        super();
+        this.nomEffet = "duplication";
+        this.idEffet = 2; 
+    }
+
+    actionCarte(listCarteJoueur, listCarteEnemie, pos) {
+        let x = listCarteJoueur[pos].getX();
+        let y = listCarteJoueur[pos].getY();
+        let nouvPv = listCarteJoueur[pos].getHp()/2;
+        let nouvAtk = listCarteJoueur[pos].getAtk()/2;
+        let img = listCarteJoueur[pos].getImg();
+        let nom = 'Copie' + listCarteJoueur[pos].getNom();
+        let effet = new Effet();
+        
+        if (pos>0 && listCarteJoueur[pos-1] == undefined) {
+            console.log('copie -');
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),effet,listCarteJoueur[pos].isPlayerCard());
+            plateau.addCard(nouvCarte,pos-1,listCarteJoueur[pos].isPlayerCard());
+        }else if (pos<listCarteJoueur.length && listCarteJoueur[pos+1] == undefined) {
+            console.log('copie +');
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk   ),effet,listCarteJoueur[pos].isPlayerCard());
+            plateau.addCard(nouvCarte,pos+1,listCarteJoueur[pos].isPlayerCard());
+        }
+        return listCarteJoueur[pos].getAtk();
     }
 }
 
