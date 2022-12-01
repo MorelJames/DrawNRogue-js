@@ -32,8 +32,8 @@ let aspectRatio;
 let maxWidth;
 let maxHeight;
 
-const imgFondCarte = new Image();
-imgFondCarte.src = '"./images/fondCarte.PNG';
+var imgFondCarte = new Image();
+imgFondCarte.src = './images/fondCarte.png';
 
 const demarrer = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
@@ -726,9 +726,6 @@ class Carte {
             this.#height = cardHeight;
         }
 
-        //context.fillStyle = "green";
-        //context.fillRect(this.#x, this.#y, this.#width, this.#height);
-
         context.drawImage(
             imgFondCarte,
             this.#x,
@@ -744,13 +741,13 @@ class Carte {
         context.fillText(
             this.#nom,
             this.#x + this.#width / 2,
-            this.#y + this.#height / 8
+            this.#y + this.#height / 10
         );
         context.drawImage(
             this.#img,
             this.#x + (this.#width/1.35)/6,
-            this.#y + this.#height / 5,
-            this.#width/1.35,
+            this.#y + this.#height / 7,
+            this.#width/1.3,
             this.#width/1.50,
         );
 
