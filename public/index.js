@@ -137,6 +137,12 @@ function lancerPartie() {
 
     endTurnButton = new EndTurnButton();
 
+    public/index.js
+    pA = new pointsAction();
+    pA.ajoutPA(1);
+
+
+
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
 
@@ -334,6 +340,8 @@ class Plateau {
         if (joueur) {
             card.setPlayed();
             card.setPos(pos);
+            pA.retirerPA(card.getCout());
+            
             let distance = card.calculMoveDistance(
                 this.listeEmplacements[card.getPos() + 4].getX(),
                 this.listeEmplacements[card.getPos() + 4].getY(),
@@ -345,6 +353,7 @@ class Plateau {
                 this.listeEmplacements[card.getPos() + 4].getX(),
                 this.listeEmplacements[card.getPos() + 4].getY()
             );
+
             this.#cardListJoueur[pos] = card;
         } else {
             card.setX(this.listeEmplacements[pos].getX());
@@ -460,6 +469,7 @@ class Plateau {
             }
         };
 
+        pA.ajoutPA(1);
         fonctionAtk();
 
         console.log("entré dans action");
@@ -661,7 +671,7 @@ class Emplacement {
             this.#isFull = true;
 
             selectedCard = undefined;
-            canPlay = false;
+            //canPlay = false;
             console.log("test");
         }
     }
@@ -680,11 +690,13 @@ class Carte {
     #atk;
     #isPlayed;
     #effet;
+    #cout;
     #pos;
     #PlayerCard;
     #imgsrc;
 
-    constructor(imgSrc, nom, hp, atk, effet) {
+
+    constructor(imgSrc, nom, hp, atk, cout, effet) {
         this.#img = new Image();
         this.#imgsrc = imgSrc;
         this.#img.src = "./images/"+imgSrc;
@@ -700,6 +712,7 @@ class Carte {
         this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
+        this.#cout = cout;
         this.#effet = effet;
     }
 
@@ -796,7 +809,7 @@ class Carte {
     mouseClick() {
         console.log(this.#nom);
         console.log(!this.#isPlayed);
-        if (!this.#isPlayed) {
+        if (!this.#isPlayed && this.#cout <= pA.getPA()) {
             selectedCard = this;
         }
     }
@@ -872,6 +885,10 @@ class Carte {
 
     getHpmax() {
         return this.#hpmax;
+    }
+
+    getCout(){
+        return this.#cout;
     }
     isPlayerCard() {
         return this.#PlayerCard;
@@ -1376,6 +1393,83 @@ class Ia {
             plateau.addCard(newCard, pos);
 
         }
+    }
+}
+
+
+class pointsAction {
+    #x;
+    #y;
+    #pA;
+    #width;
+    #height;
+
+    constructor() {
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
+        this.#pA = 0;
+        drawElement.push(this);
+        elements.push(this);
+    }
+
+    draw() {
+
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
+
+        context.fillStyle = 'gray';
+        context.beginPath();
+        context.moveTo(this.#x, this.#y);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+        context.lineTo(this.#x, this.#y + this.#height);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+        context.lineTo(this.#x, this.#y);
+        context.closePath();
+        context.fill();
+        context.font = canvas.width / 65 + 'px Arial';
+        context.fillStyle = 'black';
+        context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
+    }
+
+    mouseHover() {
+
+    }
+
+    mouseClick() {
+    }
+
+    getX() {
+        return this.#x;
+    }
+    getY() {
+        return this.#y;
+    }
+
+    getWidth() {
+        return this.#width;
+    }
+    getHeight() {
+        return this.#height;
+    }
+
+    getPA() {
+        return this.#pA;
+    }
+
+    ajoutPA(i) {
+        this.#pA += i;
+    }
+
+    retirerPA(i){
+        this.#pA -= i;
     }
 }
 
