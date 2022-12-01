@@ -39,27 +39,22 @@ const recommencer = document.getElementById("btnRecommencer");
 const voirRegle = document.getElementById("btnRegle");
 const REQUEST_ALL_CARTE = 0;
 const REQUEST_ALL_EFFET = 1;
-
 let inAnimationCard;
 
 let carteFinTour = false;
 
 let requesteDrawAll;
 
-var donnnerEffet = requestToBDD(REQUEST_ALL_EFFET);
-donnnerEffet.then((data)=>{
-    console.log(data);
-    for(let i = 0; i<Object.keys(data).length; i++){
-        console.log("data[i]");
-    }
-});
+var listCarte = [];
 
 var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data)=>{
     for(let i = 0; i<Object.keys(data).length; i++){
-        console.log(data[i]);
+        let effet = getEffet(data[i]["_ideffet"]);
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],effet))
     }
 });
+
 
 function lancerPartie() {
     context = canvas.getContext("2d");
@@ -682,16 +677,16 @@ class Carte {
     #effet;
     #pos;
     #PlayerCard;
+    #imgsrc;
 
-    constructor(imgSrc, x, y, nom, hp, atk, playerCard) {
+    constructor(imgSrc, nom, hp, atk, effet) {
         this.#img = new Image();
-        this.#img.src = imgSrc;
+        this.#imgsrc = imgSrc;
+        this.#img.src = "./images/"+imgSrc;
         //console.log(this.#img.src);
         /*this.#img.onload = ()=>{
             context.drawImage(this.#img,0,0);
         };*/
-        this.#x = x;
-        this.#y = y;
         this.#width = cardWidth;
         this.#height = cardHeight;
         this.#nom = nom;
@@ -700,7 +695,12 @@ class Carte {
         this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
-        this.#effet = new Effet();
+        this.#effet = effet;
+    }
+
+    visible(x, y, playerCard){
+        this.#x = x;
+        this.#y = y;
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
@@ -793,6 +793,17 @@ class Carte {
         return this.#x;
     }
 
+    getImageSrc(){
+        return this.#imgsrc;
+    }
+
+    getNom(){
+        return this.#nom;
+    }
+
+    getEffet(){
+        return this.#effet;
+    }
     getY() {
         return this.#y;
     }
@@ -1245,16 +1256,10 @@ class Pioche {
             canDraw &&
             inAnimationCard.length == 0
         ) {
-            let carte = new Carte(
-                "./images/boo.jpg",
-                this.#x,
-                this.#y,
-                "nomNouv",
-                5,
-                1,
-                true
-            );
-            main.ajoutCarte(carte);
+            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            newCard.visible(this.#x, this.#y, true);
+            main.ajoutCarte(newCard);
             canDraw = false;
         }
     }
@@ -1353,16 +1358,11 @@ class Ia {
                 availablePlace[
                     Math.floor(Math.random() * availablePlace.length)
                 ];
-            let newCard = new Carte(
-                "./images/boo.jpg",
-                1,
-                1,
-                card.name,
-                card.hp,
-                card.atk,
-                false
-            );
+            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            newCard.visible(1, 1, false);
             plateau.addCard(newCard, pos);
+
         }
     }
 }
@@ -1370,10 +1370,10 @@ class Ia {
 /// - Effets - ////////////////////////////////////////////////////////////////
 
 class Effet {
-    nomEffet;
+    nomEffet = "Effet par défaut";
+    idEffet = 0; 
     imgEffet;
     constructor() {
-        this.nomEffet = "Effet par défaut";
     }
 
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
@@ -1400,7 +1400,9 @@ class Effet {
 
 class Vol extends Effet {
     constructor() {
+        super();
         this.nomEffet = "vol";
+        this.idEffet = 1; 
     }
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
@@ -1427,4 +1429,18 @@ async function requestToBDD(requeste, parameter) {
     let request = await fetch(`http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/${requestFile}`, { method: "post", });
     return await request.json();
 
+}
+
+function getEffet(effetid){
+    switch (effetid) {
+        case null:
+            return new Effet();
+            break;
+        case 1:
+            return new Vol();
+            break;
+        default:
+            return new Effet();
+            break;
+    }
 }
