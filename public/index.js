@@ -53,9 +53,23 @@ var listCarte = [];
 var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data)=>{
     for(let i = 0; i<Object.keys(data).length; i++){
-        let effet = getEffet(data[i]["_ideffet"]);
-        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],effet))
+
+        let effet;
+        switch (getEffet(data[i]["_ideffet"])) {
+            case 1:
+                effet = new Vol();
+                break;
+            case 2:
+                effet = new Duplication();
+                break;
+            default:
+                effet = new Effet();
+                break;
+        }
+        console.log(effet);
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],1,effet))
     }
+    console.log(listCarte);
 });
 
 
@@ -137,7 +151,6 @@ function lancerPartie() {
 
     endTurnButton = new EndTurnButton();
 
-    public/index.js
     pA = new pointsAction();
     pA.ajoutPA(1);
 
@@ -698,7 +711,7 @@ class Carte {
     #imgsrc;
 
 
-    constructor(imgSrc, nom, hp, atk, cout, effet) {
+    constructor(imgSrc, nom, hp, atk, cout,effet) {
         this.#img = new Image();
         this.#imgsrc = imgSrc;
         this.#img.src = "./images/"+imgSrc;
@@ -725,7 +738,10 @@ class Carte {
 
         this.#PlayerCard = playerCard;
         drawElement.push(this);
-        elements.push(this);
+        if (playerCard) {
+            elements.push(this);
+        }
+        
     }
 
     draw() {
@@ -913,6 +929,7 @@ class Carte {
         console.log("liste e");
         console.log(listCarteEnemie);
         let intensite;
+        console.log(this.#effet);
         let listCarteImpacter = this.#effet.getCartImpacter(
             listCarteJoueur,
             listCarteEnemie,
@@ -1298,7 +1315,7 @@ class Pioche {
             inAnimationCard.length == 0
         ) {
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getCout(),randCard.getEffet());
             newCard.visible(this.#x, this.#y, true);
             main.ajoutCarte(newCard);
             canDraw = false;
@@ -1372,21 +1389,10 @@ class EndTurnButton {
 }
 
 class Ia {
-    #hp;
-    #cardList;
     constructor() {
-        this.#hp = 10;
-        this.#cardList = [
-            { name: "card1", atk: 1, hp: 5 },
-            { name: "card2", atk: 1, hp: 5 },
-            { name: "card3", atk: 1, hp: 5 },
-            { name: "card4", atk: 1, hp: 5 },
-        ];
     }
 
     play() {
-        let card =
-            this.#cardList[Math.floor(Math.random() * this.#cardList.length)];
         let availablePlace = [];
         for (let i = 0; i < 4; i++) {
             if (plateau.getCard(i) == undefined) {
@@ -1400,7 +1406,7 @@ class Ia {
                     Math.floor(Math.random() * availablePlace.length)
                 ];
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getEffet());
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getCout(),randCard.getEffet());
             newCard.visible(1, 1, false);
 
             plateau.addCard(newCard, pos);
