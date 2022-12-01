@@ -132,7 +132,6 @@ function lancerPartie(){
 
 
     //elements.push(pioche);
-
     drawAll(0);
     //carte.animate(50,50,100,200);
 
@@ -223,7 +222,8 @@ function finPartie() {
     finPartiePage.style.display = 'flex';
     let p = document.getElementById('message');
     
-    if (plateau.jaugeVie<1) {
+    console.log(plateau.jaugeVie);
+    if (plateau.pvJauge>9) {
         p.innerText = 'Victoire';
         document.body.style.backgroundColor = "darkgreen";
     }else{
@@ -317,6 +317,7 @@ class Plateau {
 
     addCard(card, pos, joueur) {
         if (joueur) {
+            console.log('add carte joueur');
             card.setPlayed();
             card.setPos(pos);
             let distance = card.calculMoveDistance(this.listeEmplacements[card.getPos()+4].getX(),this.listeEmplacements[card.getPos()+4].getY(),1);
@@ -423,7 +424,7 @@ class Plateau {
             }
             else{
                 console.log('fin total');
-                if(this.pvJauge > 10 || this.pvJauge <1){
+                if(this.pvJauge > 9 || this.pvJauge <1){
                     console.log("partie finie");
                     finPartie();
                 }
@@ -635,9 +636,9 @@ class Carte {
     #isPlayed;
     #effet;
     #pos;
-    #PlayerCard;
+    #PlayerCard = false;
 
-    constructor(imgSrc, x, y, nom, hp, atk, playerCard) {
+    constructor(imgSrc, x, y, nom, hp, atk,effet, playerCard) {
         this.#img = new Image();
         this.#img.src = imgSrc;
         //console.log(this.#img.src);
@@ -654,7 +655,7 @@ class Carte {
         this.#hpmax = this.#hp;
         this.#atk = atk;
         this.#isPlayed = false;
-        this.#effet = new Effet();
+        this.#effet = effet;
         this.#PlayerCard = playerCard;
         drawElement.push(this);
         elements.push(this);
@@ -784,7 +785,13 @@ class Carte {
     }
 
     getHpmax() {
-        return this.#hpmax
+        return this.#hpmax;
+    }
+    getImg(){
+        return this.#img;
+    }
+    getNom(){
+        return this.#nom;
     }
     isPlayerCard() {
         return this.#PlayerCard;
@@ -801,7 +808,7 @@ class Carte {
         console.log('liste carte impacté');
         console.log(listCarteImpacter);
         for (let i = 0; i < listCarteImpacter.length; i++) {
-            intensite = this.#effet.actionCarte(this, listCarteImpacter[i]);
+            intensite = this.#effet.actionCarte(listCarteJoueur, listCarteEnemie, this.#pos);
             if (intensite < 0 && listCarteImpacter[i] != null) {
                 intensite = this.#effet.soin(this, listCarteImpacter[i], intensite);
                 this.soin(listCarteImpacter[1], intensite)
@@ -1133,7 +1140,8 @@ class Pioche {
 
     mouseClick() {
         if (main.getListeCartes().length < 5 && canDraw && inAnimationCard.length ==0) {
-            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1, true);
+            let effet = new Effet();
+            let carte = new Carte('./images/boo.jpg', this.#x, this.#y, 'nomNouv', 5, 1,effet, true);
             main.ajoutCarte(carte);
             canDraw = false;
         }
@@ -1229,7 +1237,8 @@ class Ia {
         }
         if (availablePlace.length > 0) {
             let pos = availablePlace[Math.floor(Math.random() * availablePlace.length)];
-            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk, false);
+            let effet = new Effet();
+            let newCard = new Carte('./images/boo.jpg', 1, 1, card.name, card.hp, card.atk,effet, false);
             plateau.addCard(newCard, pos);
         }
 
@@ -1241,8 +1250,8 @@ class Ia {
 class Effet {
     nomEffet;
     imgEffet;
-    constructor() {
-        this.nomEffet = "Effet par défaut";
+    constructor(nom) {
+        this.nomEffet = nom;
     }
 
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
@@ -1254,8 +1263,8 @@ class Effet {
         return listCarteReturn;
     }
 
-    actionCarte(carteJoueur, carteImpacter) {
-        return carteJoueur.getAtk();
+    actionCarte(listCarteJoueur, listCarteEnemie, pos) {
+        return listCarteJoueur[pos].getAtk();
     }
 
     defence(carteJoueur, carteImpacter, intensite) {
@@ -1270,10 +1279,37 @@ class Effet {
 
 class Vol extends Effet {
     constructor() {
-        this.nomEffet = "vol"
+        super("vol");
     }
     getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
         return null;
+    }
+}
+
+class Duplication extends Effet{
+    constructor(){
+        super("Duplication");
+    }
+
+    actionCarte(listCarteJoueur, listCarteEnemie, pos) {
+        let x = listCarteJoueur[pos].getX();
+        let y = listCarteJoueur[pos].getY();
+        let nouvPv = listCarteJoueur[pos].getHp()/2;
+        let nouvAtk = listCarteJoueur[pos].getAtk()/2;
+        let img = listCarteJoueur[pos].getImg();
+        let nom = 'Copie' + listCarteJoueur[pos].getNom();
+        let effet = new Effet();
+        
+        if (pos>0 && listCarteJoueur[pos-1] == undefined) {
+            console.log('copie -');
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),effet,listCarteJoueur[pos].isPlayerCard());
+            plateau.addCard(nouvCarte,pos-1,listCarteJoueur[pos].isPlayerCard());
+        }else if (pos<listCarteJoueur.length && listCarteJoueur[pos+1] == undefined) {
+            console.log('copie +');
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk   ),effet,listCarteJoueur[pos].isPlayerCard());
+            plateau.addCard(nouvCarte,pos+1,listCarteJoueur[pos].isPlayerCard());
+        }
+        return listCarteJoueur[pos].getAtk();
     }
 }
 
