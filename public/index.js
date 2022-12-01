@@ -32,6 +32,9 @@ let aspectRatio;
 let maxWidth;
 let maxHeight;
 
+var imgFondCarte = new Image();
+imgFondCarte.src = './images/fondCarte.png';
+
 const demarrer = document.getElementById("demarrer");
 const regles = document.getElementById("regles");
 const finPartiePage = document.getElementById("fin");
@@ -108,9 +111,6 @@ function lancerPartie() {
     });
 
     context.lineWidth = canvas.width / 100;
-
-    cardWidth = (canvas.width / 8) * 0.8;
-    cardHeight = (canvas.height / 4) * 0.8;
 
     endTurn = false;
 
@@ -210,7 +210,7 @@ function resize() {
 
     context.lineWidth = canvas.width / 100;
     cardWidth = (canvas.width / 8) * 0.8;
-    cardHeight = (canvas.height / 4) * 0.8;
+    cardHeight = (plateau.height / 2) * 0.8;
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawElement.forEach((elem) => elem.draw());
     main.refreshPosInfo();
@@ -256,11 +256,13 @@ class Plateau {
     listeEmplacements = [];
     constructor() {
         this.width = canvas.width / 2;
-        this.height = canvas.height / 2;
+        this.height = canvas.height / 1.5;
         this.x = canvas.width / 4;
         this.y = canvas.height / 7;
         //this.#draw();
         this.pvJauge = 5;
+        cardWidth = (canvas.width / 8) * 0.8;
+        cardHeight = (this.height / 2) * 0.8;
         let tmpY = this.y;
         let emplacementPos = 0;
         for (let i = 0; i < 2; i++) {
@@ -288,12 +290,15 @@ class Plateau {
         context.fillStyle = "brown";
 
         this.width = canvas.width / 2;
-        this.height = canvas.height / 2;
+        this.height = canvas.height / 1.5;
         this.x = canvas.width / 4;
-        this.y = canvas.height / 7;
+        this.y = canvas.height / 50;
 
         //console.log(this.width);
         context.fillRect(this.x, this.y, this.width, this.height);
+
+        cardWidth = (canvas.width / 8) * 0.8;
+        cardHeight = (this.height / 2) * 0.8;
 
         let xtmp = this.x + (this.width / 4) * 0.1;
         let ytmp = this.y + (this.height / 2) * 0.1;
@@ -332,7 +337,7 @@ class Plateau {
             let distance = card.calculMoveDistance(
                 this.listeEmplacements[card.getPos() + 4].getX(),
                 this.listeEmplacements[card.getPos() + 4].getY(),
-                1
+                0.5
             );
             card.moveCard(
                 distance["x"],
@@ -498,15 +503,15 @@ class JaugeVie {
     #height;
     constructor() {
         this.#x = canvas.width / 8;
-        this.#y = canvas.height / 7;
+        this.#y = plateau.y;
         this.#height = canvas.height / 2;
         this.#width = cardWidth / 7;
     }
 
     draw() {
         this.#x = canvas.width / 8;
-        this.#y = canvas.height / 7;
-        this.#height = canvas.height / 2;
+        this.#y = plateau.y;
+        this.#height = plateau.height;
         this.#width = cardWidth / 7;
 
         context.lineWidth = lineWidth;
@@ -721,28 +726,35 @@ class Carte {
             this.#height = cardHeight;
         }
 
-        context.fillStyle = "green";
-        context.fillRect(this.#x, this.#y, this.#width, this.#height);
+        context.drawImage(
+            imgFondCarte,
+            this.#x,
+            this.#y,
+            this.#width,
+            this.#height,
+            
+        )
+
         context.fillStyle = "black";
         context.textAlign = "center";
         context.font = canvas.width / 100;
         context.fillText(
             this.#nom,
             this.#x + this.#width / 2,
-            this.#y + this.#height / 8
+            this.#y + this.#height / 10
         );
         context.drawImage(
             this.#img,
-            this.#x,
-            this.#y + this.#height / 4,
-            this.#width,
-            this.#height / 3
+            this.#x + (this.#width/1.35)/6,
+            this.#y + this.#height / 7,
+            this.#width/1.3,
+            this.#width/1.50,
         );
 
         context.fillText(
             this.#hp + "hp",
             this.#x + this.#width / 5.5,
-            this.#y + this.#height / 1.4
+            this.#y + this.#height / 1.3
         );
         context.fillText(
             this.#atk + "atk",
@@ -1063,7 +1075,7 @@ class Main {
 
     draw() {
         this.#x = canvas.width / 4;
-        this.#y = canvas.height / 1.3;
+        this.#y = canvas.height / 1.4;
         this.#width = canvas.width / 2;
         this.#height = canvas.height - this.#y;
         this.#cardGap = (canvas.width / 8) * 0.2;
@@ -1159,7 +1171,7 @@ class Main {
         inAnimationCard.push(nouvCarte);
         if (this.#listeCartes.length == 0) {
             //console.log("feur");
-            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y, 1);
+            distance = nouvCarte.calculMoveDistance(this.#cardPos, this.#y, 0.5);
             nouvCarte.moveCard(
                 distance["x"],
                 distance["y"],
@@ -1176,7 +1188,7 @@ class Main {
                 let carte = this.#listeCartes[i];
                 //console.log(carte);
                 let tempX = carte.getX() - (cardWidth / 2 + this.#cardGap / 2);
-                distance = carte.calculMoveDistance(tempX, carte.getY(), 1);
+                distance = carte.calculMoveDistance(tempX, carte.getY(), 0.5);
                 carte.moveCard(distance["x"], distance["y"], tempX, this.#y);
                 //carte.setX(carte.getX() - (cardWidth / 2 + this.#cardGap / 2));
             }
@@ -1186,7 +1198,7 @@ class Main {
             let tempX =
                 this.#listeCartes[this.#listeCartes.length - 1].getX() +
                 (cardWidth / 2 + this.#cardGap / 2);
-            distance = nouvCarte.calculMoveDistance(tempX, this.#y, 1);
+            distance = nouvCarte.calculMoveDistance(tempX, this.#y, 0.5);
             nouvCarte.moveCard(distance["x"], distance["y"], tempX, this.#y);
             this.#listeCartes.push(nouvCarte);
         }
