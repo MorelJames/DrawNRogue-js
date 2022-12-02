@@ -18,14 +18,39 @@
         <p>A la fin du tour, chaque carte attaque automatique celle en face d'elle, et s'il n'y en a pas, le joueur est attaqué à la place</p>
         <img src="images/exemple_attaque.png" width="30%">
         <p>A chaque attaque contre un joueur (l'ennemi ou vous), la jauge de PV varie, la couleur rouge représente vos points de vie, et le bleu ceux de l'ennemi. Celui dont la couleur se vide perd le combat</p>
+        <p>Les cartes peuvent avoir des effets spéciaux</p>
+        <img src="images/exemple_logo.jpg" alt="" width="10%">
       </div>
-      <button type="button" id="demarrer"> Commencer</button>
+      <button id="voirEffets">Voir la liste des effets</button>
+      <button type="button" class="demarrer"> Commencer</button>
+    </section>
+
+    <section id="effet">
+      <div>
+        <h1>Liste des effets:</h1>
+        <table>
+          <tr>
+            <td>Vol</td>
+            <td><img src="images/logo_vol.png" alt="" width="30%"></td>
+            <td>La carte affectée par cet effet, ignorera les cartes qui n'ont pas l'effet vol lors de son attaque</td>
+          </tr>
+          <tr>
+            <td>Duplication</td>
+            <td><img src="images/logo_duplication.png" alt="" width="30%"></td>
+            <td>Cet effet permet aux cartes le posédant, de se dupliquer sur un emplacement libre adjacent pendant son tour. Les clones créer auront la moitié des statistiques de la
+                carte originel, et n'aura aucun effet
+            </td>
+          </tr>
+        </table>
+      </div>
+      <button class="btnRegle">Voir les règles</button>
+      <button type="button" class="demarrer"> Commencer</button>
     </section>
 
     <section id="fin">
       <p id="message"></p>
       <div id="bouton">
-        <button id="btnRegle">Voir les règles</button>
+        <button class="btnRegle">Voir les règles</button>
         <button id="btnRecommencer">Recommencer</button>
       </div>
     </section>
