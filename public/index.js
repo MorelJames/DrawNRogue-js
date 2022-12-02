@@ -400,42 +400,6 @@ class Plateau {
     }
   }
 
-  action() {
-    endTurn = false;
-    canDraw = true;
-    canPlay = true;
-
-    var i = 0;
-
-    var fonctionAtk = () => {
-      if (i < this.#cardListJoueur.length) {
-        let joueurAttaque = new Promise((resolve) => {
-          if (this.#cardListJoueur[i] != undefined) {
-            this.#cardListJoueur[i].attakAnimation();
-          } else {
-            resolve();
-          }
-          var verif = () => {
-            if (carteFinTour) {
-              resolve();
-            } else {
-              setTimeout(() => {
-                verif();
-              }, 100);
-            }
-          };
-          verif();
-        });
-        joueurAttaque.then(() => {
-          if (this.#cardListJoueur[i] != undefined) {
-            this.#cardListJoueur[i].tourCarte(
-              this.#cardListJoueur,
-              this.#cardListEnemie,
-              true
-            );
-          }
-          carteFinTour = false;
-
     action() {
         endTurn = false;
         canDraw = true;
@@ -540,60 +504,6 @@ class Plateau {
         fonctionAtk();
 
         console.log("entré dans action");
-        /*for (let i = 0; i < this.#cardListJoueur.length; i++) {
-            console.log('tour' + i);
-            console.log('j');
-            console.log(this.#cardListJoueur[i]);
-            if (this.#cardListJoueur[i] != undefined) {
-                this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
-            }
-            var verif = () => {
-              if (carteFinTour) {
-                resolve();
-              } else {
-                setTimeout(() => {
-                  verif();
-                }, 100);
-              }
-            };
-            verif();
-          });
-          ennemieAttaque.then(() => {
-            if (this.#cardListEnemie[i] != undefined) {
-              this.#cardListEnemie[i].tourCarte(
-                this.#cardListEnemie,
-                this.#cardListJoueur,
-                false
-              );
-            }
-            carteFinTour = false;
-
-            for (let j = 0; j < this.#cardListJoueur.length; j++) {
-              if (this.#cardListJoueur[j] != undefined) {
-                if (this.#cardListJoueur[j].getHp() <= 0) {
-                  this.listeEmplacements[j].setFree();
-                  this.#cardListJoueur[j] = undefined;
-                }
-                if (this.#cardListEnemie[j] != undefined)
-                  if (this.#cardListEnemie[j].getHp() <= 0) {
-                    this.listeEmplacements[j].setFree();
-                    this.#cardListEnemie[j] = undefined;
-                  }
-              }
-            }
-            i++;
-            fonctionAtk();
-          });
-        });
-      } else {
-        if (this.pvJauge > 19 || this.pvJauge < 1) {
-          finPartie();
-        }
-      }
-    };
-
-    pA.ajoutPA(3);
-    fonctionAtk();
   }
 }
 
