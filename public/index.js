@@ -35,11 +35,14 @@ let maxHeight;
 var imgFondCarte = new Image();
 imgFondCarte.src = './images/fondCarte.png';
 
-const demarrer = document.getElementById("demarrer");
+
+const voirEffets = document.getElementById('voirEffets');
+const demarrer = document.getElementsByClassName('demarrer')
 const regles = document.getElementById("regles");
+const pageEffet = document.getElementById('effet');
 const finPartiePage = document.getElementById("fin");
 const recommencer = document.getElementById("btnRecommencer");
-const voirRegle = document.getElementById("btnRegle");
+const voirRegle = document.getElementsByClassName("btnRegle");
 const REQUEST_ALL_CARTE = 0;
 const REQUEST_ALL_EFFET = 1;
 let inAnimationCard;
@@ -54,20 +57,10 @@ var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data)=>{
     for(let i = 0; i<Object.keys(data).length; i++){
 
-        let effet;
-        switch (getEffet(data[i]["_ideffet"])) {
-            case 1:
-                effet = new Vol();
-                break;
-            case 2:
-                effet = new Duplication();
-                break;
-            default:
-                effet = new Effet();
-                break;
-        }
+        let effet = getEffet(data[i]["_ideffet"]);
+    
         console.log(effet);
-        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],1,effet))
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],data[i]['_cout'],effet))
     }
     console.log(listCarte);
 });
@@ -170,11 +163,16 @@ function lancerPartie() {
     img.src = './boo.jpg';*/
 }
 
-demarrer.onclick = function () {
-    regles.style.display = "none";
-    canvas.style.display = "block";
-    lancerPartie();
-};
+for (let index = 0; index < demarrer.length; index++) {
+    demarrer[index].onclick = function () {
+        regles.style.display = "none";
+        pageEffet.style.display = "none";
+        canvas.style.display = "block";
+        lancerPartie();
+    };
+}
+
+
 
 recommencer.onclick = function () {
     finPartiePage.style.display = "none";
@@ -183,11 +181,21 @@ recommencer.onclick = function () {
     lancerPartie();
 };
 
-voirRegle.onclick = function () {
-    finPartiePage.style.display = "none";
-    regles.style.display = "flex";
-    document.body.style.backgroundColor = "white";
-};
+for (let index = 0; index < voirRegle.length; index++) {
+    voirRegle[index].onclick = function () {
+        finPartiePage.style.display = "none";
+        pageEffet.style.display = "none";
+        regles.style.display = "flex";
+        document.body.style.backgroundColor = "white";
+    };
+}
+
+
+
+voirEffets.onclick = function (){
+    regles.style.display = "none";
+    pageEffet.style.display = 'flex';
+}
 
 //cette fonction redessine les elements du canvas
 function drawAll() {
@@ -1595,6 +1603,8 @@ function getEffet(effetid){
         case 1:
             return new Vol();
             break;
+        case 2:
+            return new Duplication();
         default:
             return new Effet();
             break;
