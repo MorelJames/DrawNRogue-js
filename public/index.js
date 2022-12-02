@@ -32,8 +32,6 @@ let aspectRatio;
 let maxWidth;
 let maxHeight;
 
-var imgFondCarte = new Image();
-imgFondCarte.src = './images/fondCarte.png';
 
 
 const voirEffets = document.getElementById('voirEffets');
@@ -57,17 +55,18 @@ var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data)=>{
     for(let i = 0; i<Object.keys(data).length; i++){
 
-        let effet;
-        switch (getEffet(data[i]["_ideffet"])) {
-            case 2:
-                effet = new Duplication();
+        let effet =getEffet(data[i]["_ideffet"]);   
+        console.log(effet);
+        let type;
+        switch (data[i]['_type']) {
+            case 'vol':
+                type = 1;
                 break;
             default:
-                effet = new Effet();
+                type = 0;
                 break;
         }
-        console.log(effet);
-        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"], data[i]["_type"],1,effet))
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"], type,data[i]['_cout'],effet))
     }
     console.log(listCarte);
 });
@@ -725,6 +724,7 @@ class Carte {
     #pos;
     #PlayerCard;
     #imgsrc;
+    #fondCarte;
 
 
     constructor(imgSrc, nom, hp, atk, type, cout,effet) {
@@ -747,6 +747,16 @@ class Carte {
         this.#effet = effet;
         this.#cout = cout;
         this.#effet = effet;
+        this.#fondCarte = new Image();
+        switch (type) {
+            case 1:
+                this.#fondCarte.src = './images/fondCarteVol.png';
+                break;
+        
+            default:
+                this.#fondCarte.src = './images/fondCarteSol.png';
+                break;
+        }
     }
 
     visible(x, y, playerCard){
@@ -777,7 +787,7 @@ class Carte {
         }
 
         context.drawImage(
-            imgFondCarte,
+            this.#fondCarte,
             this.#x,
             this.#y,
             this.#width,
@@ -811,6 +821,13 @@ class Carte {
             this.#x + this.#width / 1.2,
             this.#y + this.#height / 1.05
         );
+
+        context.fillStyle = "white";
+        context.fillText(
+            this.#cout,
+            this.#x + this.#width / 5.5,
+            this.#y + this.#height / 1.1
+        )
 
         /*this.#img.onload = ()=>{
             console.log(this.#x);
@@ -1279,12 +1296,14 @@ class Pioche {
     #y;
     #width;
     #height;
+    #audio;
 
     constructor() {
         this.#x = canvas.width - canvas.width / 4;
         this.#y = canvas.height / 1.3;
         this.#width = (plateau.width / 4) * 0.8;
         this.#height = (plateau.height / 2) * 0.8;
+        this.#audio = new Audio('./son/kado_o_hiku_1.mp3');
         elements.push(this);
         drawElement.push(this);
     }
@@ -1335,8 +1354,9 @@ class Pioche {
             canDraw &&
             inAnimationCard.length == 0
         ) {
+            this.#audio.play();
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(), getCout(),randCard.getEffet());
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(), randCard.getCout(),randCard.getEffet());
             newCard.visible(this.#x, this.#y, true);
             main.ajoutCarte(newCard);
             canDraw = false;
