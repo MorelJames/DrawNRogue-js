@@ -57,20 +57,10 @@ var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data)=>{
     for(let i = 0; i<Object.keys(data).length; i++){
 
-        let effet;
-        switch (getEffet(data[i]["_ideffet"])) {
-            case 1:
-                effet = new Vol();
-                break;
-            case 2:
-                effet = new Duplication();
-                break;
-            default:
-                effet = new Effet();
-                break;
-        }
+        let effet = getEffet(data[i]["_ideffet"]);
+    
         console.log(effet);
-        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],1,effet))
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],data[i]['_cout'],effet))
     }
     console.log(listCarte);
 });
@@ -1613,6 +1603,8 @@ function getEffet(effetid){
         case 1:
             return new Vol();
             break;
+        case 2:
+            return new Duplication();
         default:
             return new Effet();
             break;
