@@ -376,6 +376,7 @@ class Plateau {
                 this.listeEmplacements[card.getPos() + 4].getY(),
                 0.5
             );
+            console.log(distance);
             card.moveCard(
                 distance["x"],
                 distance["y"],
@@ -385,8 +386,17 @@ class Plateau {
 
             this.#cardListJoueur[pos] = card;
         } else {
-            card.setX(this.listeEmplacements[pos].getX());
-            card.setY(this.listeEmplacements[pos].getY());
+            let distance = card.calculMoveDistance(
+                this.listeEmplacements[pos].getX(),
+                this.listeEmplacements[pos].getY(),
+                0.5
+            );
+            card.moveCard(
+                distance["x"],
+                distance["y"],
+                this.listeEmplacements[pos].getX(),
+                this.listeEmplacements[pos].getY(),
+            );
             card.setPos(pos);
             card.setPlayed();
             this.#cardListEnemie[pos] = card;
@@ -873,10 +883,6 @@ class Carte {
         return this.#x;
     }
 
-    getImageSrc(){
-        return this.#imgsrc;
-    }
-
     getNom(){
         return this.#nom;
     }
@@ -948,6 +954,9 @@ class Carte {
 
     getImg(){
         return this.#img;
+    }
+    getImageSrc(){
+        return this.#imgsrc;
     }
     getNom(){
         return this.#nom;
@@ -1408,12 +1417,11 @@ class EndTurnButton {
     mouseHover() {}
 
     mouseClick() {
-        if (inAnimationCard.length == 0) {
+        if (inAnimationCard.length == 0 && !endTurn) {
             let audio = new Audio('./son/Soshite_jibun_no_ban_o_oeru_4.mp3');
             audio.play();
-            setTimeout(()=>{
-                endTurn = true},2500);
-            setTimeout(ia.play,2500);
+            endTurn = true;
+            ia.play();
             setTimeout( ()=>{
                 plateau.action()
             } ,2700);
@@ -1595,18 +1603,25 @@ class Duplication extends Effet{
         let y = listCarteJoueur[pos].getY();
         let nouvPv = listCarteJoueur[pos].getHp()/2;
         let nouvAtk = listCarteJoueur[pos].getAtk()/2;
-        let img = listCarteJoueur[pos].getImg();
-        let nom = 'Copie' + listCarteJoueur[pos].getNom();
+        let imgSrc = listCarteJoueur[pos].getImageSrc();
+        let nom = listCarteJoueur[pos].getNom();
         let type = listCarteJoueur[pos].getType();
         let effet = new Effet();
         
         if (pos>0 && listCarteJoueur[pos-1] == undefined) {
             console.log('copie -');
-            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),type, effet,listCarteJoueur[pos].isPlayerCard());
+            let nouvCarte = new Carte(imgSrc,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),type,0, effet,listCarteJoueur[pos].isPlayerCard());
+            console.log(listCarteJoueur[pos]);
+            console.log(nouvCarte);
+            console.log(pos-1);
+            console.log(listCarteJoueur[pos].isPlayerCard());
+            nouvCarte.visible(x,y,listCarteJoueur[pos].isPlayerCard());
             plateau.addCard(nouvCarte,pos-1,listCarteJoueur[pos].isPlayerCard());
         }else if (pos<listCarteJoueur.length && listCarteJoueur[pos+1] == undefined) {
             console.log('copie +');
-            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk   ),type, effet,listCarteJoueur[pos].isPlayerCard());
+            let nouvCarte = new Carte(imgSrc,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),type,0, effet,listCarteJoueur[pos].isPlayerCard());
+            nouvCarte.visible(x,y,listCarteJoueur[pos].isPlayerCard());
+            console.log(nouvCarte);
             plateau.addCard(nouvCarte,pos+1,listCarteJoueur[pos].isPlayerCard());
         }
         return listCarteJoueur[pos].getAtk();
@@ -1641,9 +1656,6 @@ function getEffet(effetid){
             return new Effet();
             break;
         case 1:
-            return new Vol();
-            break;
-        case 2:
             return new Duplication();
         default:
             return new Effet();
