@@ -153,8 +153,11 @@ function lancerPartie() {
 
   endTurnButton = new EndTurnButton();
 
-  pA = new pointsAction();
-  pA.setPA(4);
+  pA = new pointsAction(true);
+  ennemiPA = new pointsAction(false);
+
+  pA.setPA(1);
+  ennemiPA.setPA(1);
 
   let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
   audio.play();
@@ -383,96 +386,110 @@ class Plateau {
       return this.#cardListEnemie[pos];
     }
   }
+    action() {
+        endTurn = false;
+        canDraw = true;
+        canPlay = true;
 
-  action() {
-    endTurn = false;
-    canDraw = true;
-    canPlay = true;
+        var i = 0;
 
-    var i = 0;
+        var fonctionAtk = () => {
+            if (i < this.#cardListJoueur.length) {
+                let joueurAttaque = new Promise((resolve) => {
+                    console.log("tour " + i);
+                    console.log("attaque joueur");
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].attakAnimation();
+                    } else {
+                        resolve();
+                    }
+                    var verif = () => {
+                        if (carteFinTour) {
+                            console.log("fin tour joueur");
+                            resolve();
+                        } else {
+                            setTimeout(() => {
+                                verif();
+                            }, 100);
+                        }
+                    };
+                    verif();
+                });
+                joueurAttaque.then(() => {
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].tourCarte(
+                            this.#cardListJoueur,
+                            this.#cardListEnemie,
+                            true
+                        );
+                    }
+                    carteFinTour = false;
 
-    var fonctionAtk = () => {
-      if (i < this.#cardListJoueur.length) {
-        let joueurAttaque = new Promise((resolve) => {
-          if (this.#cardListJoueur[i] != undefined) {
-            this.#cardListJoueur[i].attakAnimation();
-          } else {
-            resolve();
-          }
-          var verif = () => {
-            if (carteFinTour) {
-              resolve();
-            } else {
-              setTimeout(() => {
-                verif();
-              }, 100);
+                    let ennemieAttaque = new Promise((resolve) => {
+                        console.log("attaque enemie");
+                        if (this.#cardListEnemie[i] != undefined) {
+                            console.log("entre dans anim enemie");
+                            console.log(this.#cardListEnemie[i]);
+                            this.#cardListEnemie[i].attakAnimation();
+                        } else {
+                            console.log("va dans le resolve undefined");
+                            resolve();
+                        }
+                        var verif = () => {
+                            if (carteFinTour) {
+                                console.log("fin tour enemie");
+                                resolve();
+                            } else {
+                                setTimeout(() => {
+                                    verif();
+                                }, 100);
+                            }
+                        };
+                        verif();
+                    });
+                    ennemieAttaque.then(() => {
+                        console.log("resove enemie");
+                        if (this.#cardListEnemie[i] != undefined) {
+                            this.#cardListEnemie[i].tourCarte(
+                                this.#cardListEnemie,
+                                this.#cardListJoueur,
+                                false
+                            );
+                        }
+                        carteFinTour = false;
+
+                        for (let j = 0; j < this.#cardListJoueur.length; j++) {
+                            if (this.#cardListJoueur[j] != undefined) {
+                                if (this.#cardListJoueur[j].getHp() <= 0) {
+                                    this.listeEmplacements[j].setFree();
+                                    this.#cardListJoueur[j] = undefined;
+                                }
+                                if (this.#cardListEnemie[j] != undefined)
+                                    if (this.#cardListEnemie[j].getHp() <= 0) {
+                                        this.listeEmplacements[j].setFree();
+                                        this.#cardListEnemie[j] = undefined;
+                                    }
+                            }
+                        }
+                        i++;
+                        fonctionAtk();
+                    })
+                })
             }
-          };
-          verif();
-        });
-        joueurAttaque.then(() => {
-          if (this.#cardListJoueur[i] != undefined) {
-            this.#cardListJoueur[i].tourCarte(
-              this.#cardListJoueur,
-              this.#cardListEnemie,
-              true
-            );
-          }
-          carteFinTour = false;
-
-          let ennemieAttaque = new Promise((resolve) => {
-            if (this.#cardListEnemie[i] != undefined) {
-              this.#cardListEnemie[i].attakAnimation();
-            } else {
-              resolve();
-            }
-            var verif = () => {
-              if (carteFinTour) {
-                resolve();
-              } else {
-                setTimeout(() => {
-                  verif();
-                }, 100);
-              }
-            };
-            verif();
-          });
-          ennemieAttaque.then(() => {
-            if (this.#cardListEnemie[i] != undefined) {
-              this.#cardListEnemie[i].tourCarte(
-                this.#cardListEnemie,
-                this.#cardListJoueur,
-                false
-              );
-            }
-            carteFinTour = false;
-
-            for (let j = 0; j < this.#cardListJoueur.length; j++) {
-              if (this.#cardListJoueur[j] != undefined) {
-                if (this.#cardListJoueur[j].getHp() <= 0) {
-                  this.listeEmplacements[j].setFree();
-                  this.#cardListJoueur[j] = undefined;
+            else{
+                console.log('fin total');
+                if(this.pvJauge > 19 || this.pvJauge <1){
+                    console.log("partie finie");
+                    finPartie();
                 }
-                if (this.#cardListEnemie[j] != undefined)
-                  if (this.#cardListEnemie[j].getHp() <= 0) {
-                    this.listeEmplacements[j].setFree();
-                    this.#cardListEnemie[j] = undefined;
-                  }
-              }
             }
-            i++;
-            fonctionAtk();
-          });
-        });
-      } else {
-        if (this.pvJauge > 19 || this.pvJauge < 1) {
-          finPartie();
-        }
-      }
-    };
+        };
 
-    pA.ajoutPA(3);
-    fonctionAtk();
+        pA.ajoutPA(1);
+        ennemiPA.ajoutPA(1);
+        fonctionAtk();
+
+        console.log("entré dans action");
   }
 }
 
@@ -1335,18 +1352,23 @@ class Ia {
       let pos =
         availablePlace[Math.floor(Math.random() * availablePlace.length)];
       let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-      let newCard = new Carte(
-        randCard.getImageSrc(),
-        randCard.getNom(),
-        randCard.getHpmax(),
-        randCard.getAtk(),
-        randCard.getType(),
-        randCard.getCout(),
-        randCard.getEffet()
-      );
-      newCard.visible(1, 1, false);
 
-      plateau.addCard(newCard, pos);
+      if (randCard.getCout() <= ennemiPA.getPA()){
+        let newCard = new Carte(
+            randCard.getImageSrc(),
+            randCard.getNom(),
+            randCard.getHpmax(),
+            randCard.getAtk(),
+            randCard.getType(),
+            randCard.getCout(),
+            randCard.getEffet()
+          );
+          newCard.visible(1, 1, false);
+    
+          plateau.addCard(newCard, pos);
+          ennemiPA.retirerPA(randCard.getCout());
+      }
+      
     }
   }
 }
@@ -1357,43 +1379,48 @@ class pointsAction {
   #pA;
   #width;
   #height;
+  #joueur;
 
-  constructor() {
+  constructor(j) {
     this.#x = canvas.width - canvas.width / 1.1;
     this.#y = canvas.height / 1.2;
     this.#width = canvas.width / 20;
     this.#height = canvas.height / 10;
     this.#pA = 0;
+    this.#joueur = j;
     drawElement.push(this);
     elements.push(this);
   }
 
   draw() {
-    this.#x = canvas.width - canvas.width / 1.1;
-    this.#y = canvas.height / 1.2;
-    this.#width = canvas.width / 20;
-    this.#height = canvas.height / 10;
+    if (this.#joueur){
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
 
-    context.fillStyle = "gray";
-    context.beginPath();
-    context.moveTo(this.#x, this.#y);
-    context.lineTo(this.#x + this.#width / 1.5, this.#y);
-    context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
-    context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
-    context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
-    context.lineTo(this.#x, this.#y + this.#height);
-    context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
-    context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
-    context.lineTo(this.#x, this.#y);
-    context.closePath();
-    context.fill();
-    context.font = canvas.width / 65 + "px Arial";
-    context.fillStyle = "black";
-    context.fillText(
-      this.#pA + " PA",
-      this.#x + this.#width / 3,
-      this.#y + this.#height / 1.75
-    );
+        context.fillStyle = "gray";
+        context.beginPath();
+        context.moveTo(this.#x, this.#y);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+        context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+        context.lineTo(this.#x, this.#y + this.#height);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+        context.lineTo(this.#x, this.#y);
+        context.closePath();
+        context.fill();
+        context.font = canvas.width / 65 + "px Arial";
+        context.fillStyle = "black";
+        context.fillText(
+        this.#pA + " PA",
+        this.#x + this.#width / 3,
+        this.#y + this.#height / 1.75
+        );
+    }
+    
   }
 
   mouseHover() {}
