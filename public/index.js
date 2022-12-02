@@ -158,7 +158,9 @@ function lancerPartie() {
 
   let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
   audio.play();
+
   drawAll(0);
+
 }
 
 /**
@@ -180,7 +182,7 @@ function drawAll() {
   });
 }
 /**
- * Recalcule les éléments du canvas quand celui ci est redimmensioné
+ * Recalcule la dimension des éléments du canvas quand celui ci est redimmensioné
  */
 function resize() {
   let ratioW = maxWidth / window.innerWidth;
@@ -1345,14 +1347,12 @@ class Pioche {
   #y;
   #width;
   #height;
-  #audio;
 
   constructor() {
     this.#x = canvas.width - canvas.width / 4;
     this.#y = canvas.height / 1.3;
     this.#width = (plateau.width / 4) * 0.8;
     this.#height = (plateau.height / 2) * 0.8;
-    this.#audio = new Audio("./son/kado_o_hiku_1.mp3");
     elements.push(this);
     drawElement.push(this);
   }
@@ -1407,7 +1407,6 @@ class Pioche {
       canDraw &&
       inAnimationCard.length == 0
     ) {
-      this.#audio.play();
       let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
       let newCard = new Carte(
         randCard.getImageSrc(),
@@ -1479,13 +1478,11 @@ class EndTurnButton {
    */
   mouseClick() {
     if (inAnimationCard.length == 0 && !endTurn) {
-      let audio = new Audio("./son/Soshite_jibun_no_ban_o_oeru_4.mp3");
-      audio.play();
       endTurn = true;
       ia.play();
       setTimeout(() => {
         plateau.action();
-      }, 2700);
+      }, 500);
     }
   }
 

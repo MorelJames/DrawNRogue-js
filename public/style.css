@@ -22,6 +22,12 @@ h1{
   flex-direction: column;
 }
 
+.demarrer{
+  padding : 2%;
+  font-size: 200%;
+  margin-bottom: 5%;
+}
+
 #texte{
   display: flex;
   justify-content: center;
@@ -44,6 +50,9 @@ button{
   padding : 1%;
   background-color : rgb(160, 82, 82);
   margin: 2%;
+}
+button:hover{
+  background-color : rgb(103, 41, 41);
 }
 
 
