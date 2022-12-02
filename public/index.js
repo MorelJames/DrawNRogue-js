@@ -153,8 +153,8 @@ function lancerPartie() {
   pA = new pointsAction(true);
   ennemiPA = new pointsAction(false);
 
-  pA.setPA(1);
-  ennemiPA.setPA(1);
+  pA.setPa(4);
+  ennemiPA.setPa(4);
 
   let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
   audio.play();
@@ -444,8 +444,6 @@ class Plateau {
     var fonctionAtk = () => {
       if (i < this.#cardListJoueur.length) {
         let joueurAttaque = new Promise((resolve) => {
-          console.log("tour " + i);
-          console.log("attaque joueur");
           if (this.#cardListJoueur[i] != undefined) {
             this.#cardListJoueur[i].attakAnimation();
           } else {
@@ -453,7 +451,6 @@ class Plateau {
           }
           var verif = () => {
             if (carteFinTour) {
-              console.log("fin tour joueur");
               resolve();
             } else {
               setTimeout(() => {
@@ -474,18 +471,17 @@ class Plateau {
           carteFinTour = false;
 
           let ennemieAttaque = new Promise((resolve) => {
-            console.log("attaque enemie");
+
             if (this.#cardListEnemie[i] != undefined) {
-              console.log("entre dans anim enemie");
-              console.log(this.#cardListEnemie[i]);
+
               this.#cardListEnemie[i].attakAnimation();
             } else {
-              console.log("va dans le resolve undefined");
+
               resolve();
             }
             var verif = () => {
               if (carteFinTour) {
-                console.log("fin tour enemie");
+
                 resolve();
               } else {
                 setTimeout(() => {
@@ -496,7 +492,6 @@ class Plateau {
             verif();
           });
           ennemieAttaque.then(() => {
-            console.log("resove enemie");
             if (this.#cardListEnemie[i] != undefined) {
               this.#cardListEnemie[i].tourCarte(
                 this.#cardListEnemie,
@@ -524,19 +519,19 @@ class Plateau {
           });
         });
       } else {
-        console.log("fin total");
+
         if (this.pvJauge > 19 || this.pvJauge < 1) {
-          console.log("partie finie");
+
           finPartie();
         }
       }
     };
 
-    pA.ajoutPA(1);
-    ennemiPA.ajoutPA(1);
+    pA.ajoutPA(2);
+    ennemiPA.ajoutPA(2);
     fonctionAtk();
 
-    console.log("entré dans action");
+;
   }
 }
 
@@ -1516,7 +1511,8 @@ class Ia {
         availablePlace[Math.floor(Math.random() * availablePlace.length)];
       let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
 
-      if (randCard.getCout() <= ennemiPA.getPA()){
+      if (randCard.getCout() <= ennemiPA.getPA()) {
+
         let newCard = new Carte(
             randCard.getImageSrc(),
             randCard.getNom(),
@@ -1611,8 +1607,8 @@ class pointsAction {
     return this.#pA;
   }
 
-  setPA(val) {
-    this.#pA = val;
+  setPa(i){
+    this.#pA = i;
   }
 
   ajoutPA(i) {
