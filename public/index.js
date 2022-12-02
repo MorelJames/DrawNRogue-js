@@ -282,6 +282,7 @@ function finPartie() {
 class Plateau {
     #cardListJoueur;
     #cardListEnemie;
+    #img;
     pvJauge;
     width;
     height;
@@ -318,6 +319,8 @@ class Plateau {
         }
         this.#cardListEnemie = new Array(4);
         this.#cardListJoueur = new Array(4);
+        this.#img = new Image();
+        this.#img.src = './images/plateau.jpg';
     }
 
     draw() {
@@ -329,7 +332,14 @@ class Plateau {
         this.y = canvas.height / 50;
 
         //console.log(this.width);
-        context.fillRect(this.x, this.y, this.width, this.height);
+        context.drawImage(
+            this.#img,
+            this.x,
+            this.y,
+            this.width,
+            this.height,
+        )
+        //context.fillRect(this.x, this.y, this.width, this.height);
 
         cardWidth = (canvas.width / 8) * 0.8;
         cardHeight = (this.height / 2) * 0.8;
@@ -618,6 +628,8 @@ class Emplacement {
     #isFull;
     #pos;
     #placedCart;
+    #img;
+    #imgSurvol;
 
     constructor(x, y, width, height, pos) {
         this.#x = x;
@@ -628,6 +640,10 @@ class Emplacement {
         this.#isMouseHover = false;
         this.#isFull = false;
         this.#pos = pos;
+        this.#img = new Image();
+        this.#img.src = './images/emplacement.png';
+        this.#imgSurvol = new Image();
+        this.#imgSurvol.src = './images/emplacementSurvol.png';
         //this.#draw();
     }
 
@@ -637,9 +653,23 @@ class Emplacement {
         this.#width = width;
         this.#height = height;
         if (this.#isMouseHover && !this.#isFull && this.#pos > 3) {
-            this.#color = "yellow";
+            //this.#color = "yellow";
+            context.drawImage(
+                this.#imgSurvol,
+                this.#x,
+                this.#y,
+                this.#width,
+                this.#height
+            )
         } else {
-            this.#color = "white";
+            //this.#color = "white";
+            context.drawImage(
+                this.#img,
+                this.#x,
+                this.#y,
+                this.#width,
+                this.#height
+            )
         }
 
         if (this.#placedCart != undefined) {
@@ -649,9 +679,9 @@ class Emplacement {
                 this.#placedCart.setY(this.#y);
             }
         }
-        context.lineWidth = lineWidth;
+        /*context.lineWidth = lineWidth;
         context.strokeStyle = this.#color;
-        context.strokeRect(this.#x, this.#y, this.#width, this.#height);
+        context.strokeRect(this.#x, this.#y, this.#width, this.#height);*/
     }
     /*animate(x){
         this.#x = x;
