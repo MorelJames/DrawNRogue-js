@@ -708,7 +708,8 @@ class Emplacement {
             selectedCard != undefined &&
             this.#pos > 3 &&
             canPlay &&
-            inAnimationCard.length == 0
+            inAnimationCard.length == 0 &&
+            !endTurn
         ) {
             inAnimationCard.push(selectedCard);
             this.#placedCart = selectedCard;
