@@ -294,7 +294,7 @@ class Plateau {
         this.x = canvas.width / 4;
         this.y = canvas.height / 7;
         //this.#draw();
-        this.pvJauge = 5;
+        this.pvJauge = 10;
         cardWidth = (canvas.width / 8) * 0.8;
         cardHeight = (this.height / 2) * 0.8;
         let tmpY = this.y;
@@ -502,7 +502,7 @@ class Plateau {
             }
             else{
                 console.log('fin total');
-                if(this.pvJauge > 9 || this.pvJauge <1){
+                if(this.pvJauge > 19 || this.pvJauge <1){
                     console.log("partie finie");
                     finPartie();
                 }
@@ -587,7 +587,15 @@ class JaugeVie {
         context.closePath();
         context.stroke();
 
-        let proportionBleu = (this.#height / 10) * (10 - plateau.pvJauge);
+        let proportionBleu;
+        if (plateau.pvJauge<0) {
+            proportionBleu = this.#height; 
+        }else if (plateau.pvJauge>19) {
+            proportionBleu = 0;
+        }else{
+            proportionBleu = (this.#height / 20) * (20 - plateau.pvJauge);
+        }
+        
         context.fillStyle = "lightblue";
         context.fillRect(this.#x, this.#y, this.#width, proportionBleu);
         context.fillStyle = "red";
