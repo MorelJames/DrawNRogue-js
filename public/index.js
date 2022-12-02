@@ -56,9 +56,6 @@ donnerCarte.then((data)=>{
 
         let effet;
         switch (getEffet(data[i]["_ideffet"])) {
-            case 1:
-                effet = new Vol();
-                break;
             case 2:
                 effet = new Duplication();
                 break;
@@ -67,7 +64,7 @@ donnerCarte.then((data)=>{
                 break;
         }
         console.log(effet);
-        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"],1,effet))
+        listCarte.push(new Carte(data[i]["_lienImg"],data[i]["_nom"],data[i]["_pv"],data[i]["_atk"], data[i]["_type"],1,effet))
     }
     console.log(listCarte);
 });
@@ -703,6 +700,7 @@ class Carte {
     #hp;
     #hpmax;
     #atk;
+    #type;
     #isPlayed;
     #effet;
     #cout;
@@ -711,7 +709,7 @@ class Carte {
     #imgsrc;
 
 
-    constructor(imgSrc, nom, hp, atk, cout,effet) {
+    constructor(imgSrc, nom, hp, atk, type, cout,effet) {
         this.#img = new Image();
         this.#imgsrc = imgSrc;
         this.#img.src = "./images/"+imgSrc;
@@ -726,6 +724,7 @@ class Carte {
         this.#hp = hp;
         this.#hpmax = this.#hp;
         this.#atk = atk;
+        this.#type = type;
         this.#isPlayed = false;
         this.#effet = effet;
         this.#cout = cout;
@@ -903,6 +902,10 @@ class Carte {
         return this.#hp;
     }
 
+    getType() {
+        return this.#type;
+    }
+
     getHpmax() {
         return this.#hpmax;
     }
@@ -962,7 +965,7 @@ class Carte {
     }
 
     attaque(carteImpacter, intensite, joueur) {
-        if (carteImpacter != null) {
+        if (carteImpacter != null && carteImpacter.getType() >= this.#type) {
             carteImpacter.setHp(Math.max(0, carteImpacter.getHp() - intensite));
             if (carteImpacter.getHp() == 0) {
                 if (carteImpacter.isPlayerCard()) {
@@ -1315,7 +1318,7 @@ class Pioche {
             inAnimationCard.length == 0
         ) {
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getCout(),randCard.getEffet());
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(), getCout(),randCard.getEffet());
             newCard.visible(this.#x, this.#y, true);
             main.ajoutCarte(newCard);
             canDraw = false;
@@ -1406,7 +1409,7 @@ class Ia {
                     Math.floor(Math.random() * availablePlace.length)
                 ];
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(),randCard.getCout(),randCard.getEffet());
+            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(),randCard.getCout(),randCard.getEffet());
             newCard.visible(1, 1, false);
 
             plateau.addCard(newCard, pos);
@@ -1550,15 +1553,16 @@ class Duplication extends Effet{
         let nouvAtk = listCarteJoueur[pos].getAtk()/2;
         let img = listCarteJoueur[pos].getImg();
         let nom = 'Copie' + listCarteJoueur[pos].getNom();
+        let type = listCarteJoueur[pos].getType();
         let effet = new Effet();
         
         if (pos>0 && listCarteJoueur[pos-1] == undefined) {
             console.log('copie -');
-            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),effet,listCarteJoueur[pos].isPlayerCard());
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk),type, effet,listCarteJoueur[pos].isPlayerCard());
             plateau.addCard(nouvCarte,pos-1,listCarteJoueur[pos].isPlayerCard());
         }else if (pos<listCarteJoueur.length && listCarteJoueur[pos+1] == undefined) {
             console.log('copie +');
-            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk   ),effet,listCarteJoueur[pos].isPlayerCard());
+            let nouvCarte = new Carte('./images/boo.jpg',x,y,nom,Math.ceil(nouvPv),Math.ceil(nouvAtk   ),type, effet,listCarteJoueur[pos].isPlayerCard());
             plateau.addCard(nouvCarte,pos+1,listCarteJoueur[pos].isPlayerCard());
         }
         return listCarteJoueur[pos].getAtk();
