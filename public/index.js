@@ -1,37 +1,6 @@
+/// - Constantes - ////////////////////////////////////////////////////////////
+
 const canvas = document.querySelector("canvas");
-let context;
-let palteau;
-let rect;
-let offSetX;
-let offSetY;
-let elements; //tableau contenant les elements qui peuvent être cliqué à la souris
-
-let drawElement; // tableau contenant les elements à dessiner sur le canvas
-
-let interval = 1000 / 60; // defini le nombre d'image par seconde du jeu
-let timer = 0;
-let lastTime = 0;
-let deltaTime;
-
-let plateau;
-let lineWidth;
-let selectedCard;
-let main;
-let ia;
-
-let cardWidth;
-let cardHeight;
-
-let endTurn;
-
-let canDraw;
-let canPlay;
-
-let aspectRatio;
-
-let maxWidth;
-let maxHeight;
-
 const voirEffets = document.getElementById("voirEffets");
 const demarrer = document.getElementsByClassName("demarrer");
 const regles = document.getElementById("regles");
@@ -41,13 +10,39 @@ const recommencer = document.getElementById("btnRecommencer");
 const voirRegle = document.getElementsByClassName("btnRegle");
 const REQUEST_ALL_CARTE = 0;
 const REQUEST_ALL_EFFET = 1;
+
+/// - Variables - /////////////////////////////////////////////////////////////
+
+let context;
+let palteau;
+let rect;
+let offSetX;
+let offSetY;
+let elements; //tableau contenant les elements qui peuvent être cliqué à la souris
+let drawElement; // tableau contenant les elements à dessiner sur le canvas
+let interval = 1000 / 60; // defini le nombre d'image par seconde du jeu
+let timer = 0;
+let lastTime = 0;
+let deltaTime;
+let plateau;
+let lineWidth;
+let selectedCard;
+let main;
+let ia;
+let cardWidth;
+let cardHeight;
+let endTurn;
+let canDraw;
+let canPlay;
+let aspectRatio;
+let maxWidth;
+let maxHeight;
 let inAnimationCard;
-
 let carteFinTour = false;
-
 let requesteDrawAll;
-
 var listCarte = [];
+
+/// - Récupération données de jeu - ///////////////////////////////////////////
 
 var donnerCarte = requestToBDD(REQUEST_ALL_CARTE);
 donnerCarte.then((data) => {
@@ -77,105 +72,197 @@ donnerCarte.then((data) => {
   }
 });
 
+/// - Récupération données de jeu - ///////////////////////////////////////////
+
 function lancerPartie() {
-    context = canvas.getContext("2d");
-    maxWidth = 1920;
-    maxHeight = 1080;
-    let ratioW = maxWidth / window.innerWidth;
-    let ratioH = maxHeight / window.innerHeight;
+  context = canvas.getContext("2d");
+  maxWidth = 1920;
+  maxHeight = 1080;
+  let ratioW = maxWidth / window.innerWidth;
+  let ratioH = maxHeight / window.innerHeight;
 
-    if (ratioW < ratioH) {
-        (canvas.width = (maxWidth * 1) / ratioH),
-            (canvas.height = (maxHeight * 1) / ratioH);
-    } else {
-        (canvas.width = (maxWidth * 1) / ratioW),
-            (canvas.height = (maxHeight * 1) / ratioW);
+  if (ratioW < ratioH) {
+    (canvas.width = (maxWidth * 1) / ratioH),
+      (canvas.height = (maxHeight * 1) / ratioH);
+  } else {
+    (canvas.width = (maxWidth * 1) / ratioW),
+      (canvas.height = (maxHeight * 1) / ratioW);
+  }
+
+  aspectRatio = 16 / 9;
+
+  rect = canvas.getBoundingClientRect();
+  (offSetX = canvas.width / rect.width),
+    (offSetY = canvas.height / rect.height);
+
+  canvas.addEventListener("mousemove", (event) => {
+    //console.log(event);
+    let x = (event.x - rect.left) * offSetX;
+    let y = (event.y - rect.top) * offSetY;
+    elements.forEach((elem) => elem.mouseHover(x, y));
+  });
+
+  canvas.addEventListener("click", (event) => {
+    let x = (event.x - rect.left) * offSetX;
+    let y = (event.y - rect.top) * offSetY;
+    let clicked = false;
+    let i = 0;
+    while (i < elements.length && !clicked) {
+      let xElem = elements[i].getX();
+      let yElem = elements[i].getY();
+      let widthElem = elements[i].getWidth();
+      let heightElem = elements[i].getHeight();
+      if (
+        x > xElem &&
+        x < xElem + widthElem &&
+        y > yElem &&
+        y < yElem + heightElem
+      ) {
+        elements[i].mouseClick();
+        clicked = true;
+      }
+      i++;
     }
+  });
 
-    aspectRatio = 16 / 9;
+  context.lineWidth = canvas.width / 100;
 
-    rect = canvas.getBoundingClientRect();
-    (offSetX = canvas.width / rect.width),
-        (offSetY = canvas.height / rect.height);
+  endTurn = false;
 
-    canvas.addEventListener("mousemove", (event) => {
-        //console.log(event);
-        let x = (event.x - rect.left) * offSetX;
-        let y = (event.y - rect.top) * offSetY;
-        elements.forEach((elem) => elem.mouseHover(x, y));
-    });
+  canDraw = true;
+  canPlay = true;
 
-    canvas.addEventListener("click", (event) => {
-        let x = (event.x - rect.left) * offSetX;
-        let y = (event.y - rect.top) * offSetY;
-        let clicked = false;
-        let i = 0;
-        while (i < elements.length && !clicked) {
-            let xElem = elements[i].getX();
-            let yElem = elements[i].getY();
-            let widthElem = elements[i].getWidth();
-            let heightElem = elements[i].getHeight();
-            if (
-                x > xElem &&
-                x < xElem + widthElem &&
-                y > yElem &&
-                y < yElem + heightElem
-            ) {
-                elements[i].mouseClick();
-                clicked = true;
-            }
-            i++;
-        }
-    });
+  drawElement = [];
+  elements = [];
+  inAnimationCard = [];
 
-    context.lineWidth = canvas.width / 100;
+  plateau = new Plateau();
+  drawElement.push(plateau);
+  //palteau.animate();
 
-    endTurn = false;
+  jaugeVie = new JaugeVie();
+  drawElement.push(jaugeVie);
 
-    canDraw = true;
-    canPlay = true;
+  ia = new Ia();
 
-    drawElement = [];
-    elements = [];
-    inAnimationCard = [];
+  main = new Main();
+  drawElement.push(main);
 
-    plateau = new Plateau();
-    drawElement.push(plateau);
-    //palteau.animate();
+  pioche = new Pioche();
 
-    jaugeVie = new JaugeVie();
-    drawElement.push(jaugeVie);
+  endTurnButton = new EndTurnButton();
 
-    ia = new Ia();
+  pA = new pointsAction(true);
+  ennemiPA = new pointsAction(false);
 
-    main = new Main();
-    drawElement.push(main);
+  pA.ajoutPA(1);
+  ennemiPA.ajoutPA(1);
 
-    pioche = new Pioche();
+  let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
+  audio.play();
+  //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
+  //plateau.addCard(carteTest,0);
 
-    endTurnButton = new EndTurnButton();
+  //elements.push(pioche);
+  drawAll(0);
+  //carte.animate(50,50,100,200);
 
-    pA = new pointsAction(true);
-    ennemiPA = new pointsAction(false);
-
-    pA.ajoutPA(1);
-    ennemiPA.ajoutPA(1);
-
-    let audio = new Audio('./son/ittsu_deeyueru_taimu_3.mp3')
-    audio.play();
-    //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
-    //plateau.addCard(carteTest,0);
-
-    //elements.push(pioche);
-    drawAll(0);
-    //carte.animate(50,50,100,200);
-
-    /*var img = new Image();
+  /*var img = new Image();
     img.onload = ()=>{
         context.drawImage(img,0,0);
     };
     img.src = './boo.jpg';*/
 }
+
+/**
+ * redessine tout les elements du canvas
+ */
+function drawAll() {
+  deltaTime = window.performance.now() - lastTime;
+  lastTime = window.performance.now();
+
+  if (timer > interval) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    drawElement.forEach((elem) => elem.draw());
+    timer = timer - interval;
+  } else {
+    timer += deltaTime;
+  }
+  requesteDrawAll = requestAnimationFrame(() => {
+    drawAll();
+  });
+}
+/**
+ * Recalcule les éléments du canvas quand celui ci est redimmensioné
+ */
+function resize() {
+  let ratioW = maxWidth / window.innerWidth;
+  let ratioH = maxHeight / window.innerHeight;
+
+  if (ratioW < ratioH) {
+    (canvas.width = (maxWidth * 1) / ratioH),
+      (canvas.height = (maxHeight * 1) / ratioH);
+  } else {
+    (canvas.width = (maxWidth * 1) / ratioW),
+      (canvas.height = (maxHeight * 1) / ratioW);
+  }
+
+  context.lineWidth = canvas.width / 100;
+  cardWidth = (canvas.width / 8) * 0.8;
+  cardHeight = (plateau.height / 2) * 0.8;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  drawElement.forEach((elem) => elem.draw());
+
+  main.reajusterCartes();
+}
+
+/**
+ * Affiche l'écran de fin de partie
+ */
+function finPartie() {
+  canvas.style.display = "none";
+  finPartiePage.style.display = "flex";
+  let p = document.getElementById("message");
+
+  if (plateau.pvJauge > 9) {
+    p.innerText = "Victoire";
+    document.body.style.backgroundColor = "darkgreen";
+  } else {
+    p.innerText = "Défaite";
+    document.body.style.backgroundColor = "darkred";
+  }
+  drawElement = null;
+  elements = null;
+  plateau = null;
+  main = null;
+  pioche = null;
+  endTurnButton = null;
+  ia = null;
+  jaugeVie = null;
+  cancelAnimationFrame(requesteDrawAll);
+  context = null;
+  window.removeEventListener("resize", resize);
+}
+
+/**
+ * Renvoie l'effet en fonction de l'id de l'effet
+ * @param {number} effetid 
+ * @returns 
+ */
+function getEffet(effetid) {
+  switch (effetid) {
+    case null:
+      return new Effet();
+      break;
+    case 1:
+      return new Duplication();
+    default:
+      return new Effet();
+      break;
+  }
+}
+
+/// - Initialisation du Jeu - /////////////////////////////////////////////////
 
 for (let index = 0; index < demarrer.length; index++) {
   demarrer[index].onclick = function () {
@@ -207,72 +294,13 @@ voirEffets.onclick = function () {
   pageEffet.style.display = "flex";
 };
 
-//cette fonction redessine les elements du canvas
-function drawAll() {
-  deltaTime = window.performance.now() - lastTime;
-  lastTime = window.performance.now();
-
-  if (timer > interval) {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    drawElement.forEach((elem) => elem.draw());
-    timer = timer - interval;
-  } else {
-    timer += deltaTime;
-  }
-  requesteDrawAll = requestAnimationFrame(() => {
-    drawAll();
-  });
-}
-
-function resize() {
-  let ratioW = maxWidth / window.innerWidth;
-  let ratioH = maxHeight / window.innerHeight;
-
-  if (ratioW < ratioH) {
-    (canvas.width = (maxWidth * 1) / ratioH),
-      (canvas.height = (maxHeight * 1) / ratioH);
-  } else {
-    (canvas.width = (maxWidth * 1) / ratioW),
-      (canvas.height = (maxHeight * 1) / ratioW);
-  }
-
-  context.lineWidth = canvas.width / 100;
-  cardWidth = (canvas.width / 8) * 0.8;
-  cardHeight = (plateau.height / 2) * 0.8;
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  drawElement.forEach((elem) => elem.draw());
-  main.refreshPosInfo();
-
-  main.reajusterCartes();
-}
-
 window.addEventListener("resize", resize);
 
-function finPartie() {
-  canvas.style.display = "none";
-  finPartiePage.style.display = "flex";
-  let p = document.getElementById("message");
+/// - Classes - ///////////////////////////////////////////////////////////////
 
-  if (plateau.pvJauge > 9) {
-    p.innerText = "Victoire";
-    document.body.style.backgroundColor = "darkgreen";
-  } else {
-    p.innerText = "Défaite";
-    document.body.style.backgroundColor = "darkred";
-  }
-  drawElement = null;
-  elements = null;
-  plateau = null;
-  main = null;
-  pioche = null;
-  endTurnButton = null;
-  ia = null;
-  jaugeVie = null;
-  cancelAnimationFrame(requesteDrawAll);
-  context = null;
-  window.removeEventListener("resize", resize);
-}
-
+/**
+ * S'occupe de la gestion d'une partie
+ */
 class Plateau {
   #cardListJoueur;
   #cardListEnemie;
@@ -317,6 +345,9 @@ class Plateau {
     this.#img.src = "./images/plateau.jpg";
   }
 
+  /**
+   * Dessine le plateau sur le canvas
+   */
   draw() {
     context.fillStyle = "brown";
 
@@ -355,6 +386,12 @@ class Plateau {
     }
   }
 
+  /**
+   * Ajoute une carte sur le plateau en fonction du joueur
+   * @param {Carte} card La carte à ajouter
+   * @param {number} pos position de la carte à ajouter
+   * @param {boolean} joueur détermine si il place la carte dans la ligne du joueur ou de l'ia
+   */
   addCard(card, pos, joueur) {
     if (joueur) {
       card.setPlayed();
@@ -392,6 +429,13 @@ class Plateau {
       this.#cardListEnemie[pos] = card;
     }
   }
+
+  /**
+   * Renvoie la carte à la position indiqué
+   * @param {number} pos position de la carte demander
+   * @param {boolean} joueur détermine si il cherche la carte dans la ligne du joueur ou de l'ia
+   * @returns La carte à la position indiqué
+   */
   getCard(pos, joueur) {
     if (joueur) {
       return this.#cardListJoueur[pos];
@@ -400,113 +444,118 @@ class Plateau {
     }
   }
 
-    action() {
-        endTurn = false;
-        canDraw = true;
-        canPlay = true;
+  /**
+   * Effectue le tour en faisant le tour de l'ia et en déclanchant l'effet des cartes
+   */
+  action() {
+    endTurn = false;
+    canDraw = true;
+    canPlay = true;
 
-        var i = 0;
+    var i = 0;
 
-        var fonctionAtk = () => {
-            if (i < this.#cardListJoueur.length) {
-                let joueurAttaque = new Promise((resolve) => {
-                    console.log("tour " + i);
-                    console.log("attaque joueur");
-                    if (this.#cardListJoueur[i] != undefined) {
-                        this.#cardListJoueur[i].attakAnimation();
-                    } else {
-                        resolve();
-                    }
-                    var verif = () => {
-                        if (carteFinTour) {
-                            console.log("fin tour joueur");
-                            resolve();
-                        } else {
-                            setTimeout(() => {
-                                verif();
-                            }, 100);
-                        }
-                    };
-                    verif();
-                });
-                joueurAttaque.then(() => {
-                    if (this.#cardListJoueur[i] != undefined) {
-                        this.#cardListJoueur[i].tourCarte(
-                            this.#cardListJoueur,
-                            this.#cardListEnemie,
-                            true
-                        );
-                    }
-                    carteFinTour = false;
-
-                    let ennemieAttaque = new Promise((resolve) => {
-                        console.log("attaque enemie");
-                        if (this.#cardListEnemie[i] != undefined) {
-                            console.log("entre dans anim enemie");
-                            console.log(this.#cardListEnemie[i]);
-                            this.#cardListEnemie[i].attakAnimation();
-                        } else {
-                            console.log("va dans le resolve undefined");
-                            resolve();
-                        }
-                        var verif = () => {
-                            if (carteFinTour) {
-                                console.log("fin tour enemie");
-                                resolve();
-                            } else {
-                                setTimeout(() => {
-                                    verif();
-                                }, 100);
-                            }
-                        };
-                        verif();
-                    });
-                    ennemieAttaque.then(() => {
-                        console.log("resove enemie");
-                        if (this.#cardListEnemie[i] != undefined) {
-                            this.#cardListEnemie[i].tourCarte(
-                                this.#cardListEnemie,
-                                this.#cardListJoueur,
-                                false
-                            );
-                        }
-                        carteFinTour = false;
-
-                        for (let j = 0; j < this.#cardListJoueur.length; j++) {
-                            if (this.#cardListJoueur[j] != undefined) {
-                                if (this.#cardListJoueur[j].getHp() <= 0) {
-                                    this.listeEmplacements[j].setFree();
-                                    this.#cardListJoueur[j] = undefined;
-                                }
-                                if (this.#cardListEnemie[j] != undefined)
-                                    if (this.#cardListEnemie[j].getHp() <= 0) {
-                                        this.listeEmplacements[j].setFree();
-                                        this.#cardListEnemie[j] = undefined;
-                                    }
-                            }
-                        }
-                        i++;
-                        fonctionAtk();
-                    })
-                })
+    var fonctionAtk = () => {
+      if (i < this.#cardListJoueur.length) {
+        let joueurAttaque = new Promise((resolve) => {
+          console.log("tour " + i);
+          console.log("attaque joueur");
+          if (this.#cardListJoueur[i] != undefined) {
+            this.#cardListJoueur[i].attakAnimation();
+          } else {
+            resolve();
+          }
+          var verif = () => {
+            if (carteFinTour) {
+              console.log("fin tour joueur");
+              resolve();
+            } else {
+              setTimeout(() => {
+                verif();
+              }, 100);
             }
-            else{
-                console.log('fin total');
-                if(this.pvJauge > 19 || this.pvJauge <1){
-                    console.log("partie finie");
-                    finPartie();
+          };
+          verif();
+        });
+        joueurAttaque.then(() => {
+          if (this.#cardListJoueur[i] != undefined) {
+            this.#cardListJoueur[i].tourCarte(
+              this.#cardListJoueur,
+              this.#cardListEnemie,
+              true
+            );
+          }
+          carteFinTour = false;
+
+          let ennemieAttaque = new Promise((resolve) => {
+            console.log("attaque enemie");
+            if (this.#cardListEnemie[i] != undefined) {
+              console.log("entre dans anim enemie");
+              console.log(this.#cardListEnemie[i]);
+              this.#cardListEnemie[i].attakAnimation();
+            } else {
+              console.log("va dans le resolve undefined");
+              resolve();
+            }
+            var verif = () => {
+              if (carteFinTour) {
+                console.log("fin tour enemie");
+                resolve();
+              } else {
+                setTimeout(() => {
+                  verif();
+                }, 100);
+              }
+            };
+            verif();
+          });
+          ennemieAttaque.then(() => {
+            console.log("resove enemie");
+            if (this.#cardListEnemie[i] != undefined) {
+              this.#cardListEnemie[i].tourCarte(
+                this.#cardListEnemie,
+                this.#cardListJoueur,
+                false
+              );
+            }
+            carteFinTour = false;
+
+            for (let j = 0; j < this.#cardListJoueur.length; j++) {
+              if (this.#cardListJoueur[j] != undefined) {
+                if (this.#cardListJoueur[j].getHp() <= 0) {
+                  this.listeEmplacements[j].setFree();
+                  this.#cardListJoueur[j] = undefined;
                 }
+                if (this.#cardListEnemie[j] != undefined)
+                  if (this.#cardListEnemie[j].getHp() <= 0) {
+                    this.listeEmplacements[j].setFree();
+                    this.#cardListEnemie[j] = undefined;
+                  }
+              }
             }
-        };
+            i++;
+            fonctionAtk();
+          });
+        });
+      } else {
+        console.log("fin total");
+        if (this.pvJauge > 19 || this.pvJauge < 1) {
+          console.log("partie finie");
+          finPartie();
+        }
+      }
+    };
 
-        pA.ajoutPA(1);
-        ennemiPA.ajoutPA(1);
-        fonctionAtk();
+    pA.ajoutPA(1);
+    ennemiPA.ajoutPA(1);
+    fonctionAtk();
 
-        console.log("entré dans action");
+    console.log("entré dans action");
   }
 }
 
+/**
+ * Affiche les point de vie
+ */
 class JaugeVie {
   #x;
   #y;
@@ -518,7 +567,9 @@ class JaugeVie {
     this.#height = canvas.height / 2;
     this.#width = cardWidth / 7;
   }
-
+  /**
+   * Affiche l'élément
+   */
   draw() {
     this.#x = canvas.width / 8;
     this.#y = plateau.y;
@@ -563,6 +614,9 @@ class JaugeVie {
   }
 }
 
+/**
+ * S'occupe de la gestion des emplacement des cartes
+ */
 class Emplacement {
   #x;
   #y;
@@ -591,6 +645,13 @@ class Emplacement {
     this.#imgSurvol.src = "./images/emplacementSurvol.png";
   }
 
+  /**
+   * Affiche l'éléments
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} width 
+   * @param {number} height 
+   */
   draw(x, y, width, height) {
     this.#x = x;
     this.#y = y;
@@ -642,6 +703,11 @@ class Emplacement {
     return this.#height;
   }
 
+  /**
+   * Indique si la souris est sur l'élément
+   * @param {number} x 
+   * @param {number} y 
+   */
   mouseHover(x, y) {
     if (!this.#isFull) {
       if (
@@ -657,6 +723,11 @@ class Emplacement {
     }
   }
 
+  /**
+   * Effectue l'interraction avec l'emplacement
+   * @param {number} x 
+   * @param {number} y 
+   */
   mouseClick() {
     if (
       !this.#isFull &&
@@ -677,6 +748,9 @@ class Emplacement {
   }
 }
 
+/**
+ * Gère les cartes du jeu
+ */
 class Carte {
   #img;
   #x;
@@ -725,6 +799,12 @@ class Carte {
     }
   }
 
+  /**
+   * Rend une carte visible
+   * @param {number} x 
+   * @param {number} y 
+   * @param {boolean} playerCard 
+   */
   visible(x, y, playerCard) {
     this.#x = x;
     this.#y = y;
@@ -736,6 +816,9 @@ class Carte {
     }
   }
 
+  /**
+   * Affiche l'élèment
+   */
   draw() {
     if (this.#hp <= 0) {
       let i = drawElement.indexOf(this);
@@ -791,6 +874,11 @@ class Carte {
     );
   }
 
+  /**
+   * Modifie l'aspect de la carte au survol de la souris
+   * @param {number} x 
+   * @param {number} y 
+   */
   mouseHover(x, y) {
     if (!this.#isPlayed) {
       if (
@@ -810,6 +898,9 @@ class Carte {
     }
   }
 
+  /**
+   * Selection la carte quand elle est cliqué
+   */
   mouseClick() {
     if (!this.#isPlayed && this.#cout <= pA.getPA()) {
       selectedCard = this;
@@ -905,6 +996,12 @@ class Carte {
     return this.#PlayerCard;
   }
 
+  /**
+   * Effectue les action de la carte en fin de tour
+   * @param {Array} listCarteJoueur 
+   * @param {Array} listCarteEnemie 
+   * @param {boolean} joueur 
+   */
   tourCarte(listCarteJoueur, listCarteEnemie, joueur) {
     let intensite;
 
@@ -934,10 +1031,22 @@ class Carte {
       }
     }
   }
+
+  /**
+   * Soigne la carte
+   * @param {Carte} carteImpacter 
+   * @param {number} intensite 
+   */
   soin(carteImpacter, intensite) {
     carteImpacter.setHp(Math.min(carteImpacter.getHpmax(), hp + intensite));
   }
 
+  /**
+   * Attaque une carte ou le joueur
+   * @param {Carte} carteImpacter 
+   * @param {number} intensite 
+   * @param {boolean} joueur 
+   */
   attaque(carteImpacter, intensite, joueur) {
     if (carteImpacter != null && carteImpacter.getType() >= this.#type) {
       carteImpacter.setHp(Math.max(0, carteImpacter.getHp() - intensite));
@@ -952,7 +1061,13 @@ class Carte {
     }
   }
 
-  //pour l'instant le temps est considéré en seconde
+  /**
+   * Déplace la carte dans le canvas
+   * @param {number} xDistancePerFrame 
+   * @param {number} yDistancePerFrame 
+   * @param {number} x 
+   * @param {number} y 
+   */
   moveCard(xDistancePerFrame, yDistancePerFrame, x, y) {
     if (timer > interval) {
       if (this.x != x) {
@@ -983,6 +1098,13 @@ class Carte {
     }
   }
 
+  /**
+   * Calcule le temps nécéssaire pour le déplacement
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} time 
+   * @returns 
+   */
   calculMoveDistance(x, y, time) {
     let distance = {
       x: (this.#x - x) / (60 * time),
@@ -991,6 +1113,9 @@ class Carte {
     return distance;
   }
 
+  /**
+   * Déclanche l'animation d'attaque
+   */
   attakAnimation() {
     var distanceY = cardHeight / (60 * 0.05);
     if (this.#PlayerCard) {
@@ -1069,6 +1194,9 @@ class Carte {
   }
 }
 
+/**
+ * S'occupe de la gestion des carte pioché par le joueur
+ */
 class Main {
   #x;
   #y;
@@ -1088,6 +1216,9 @@ class Main {
     this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
   }
 
+  /**
+   * Affiche l'élément
+   */
   draw() {
     this.#x = canvas.width / 4;
     this.#y = canvas.height / 1.4;
@@ -1099,6 +1230,9 @@ class Main {
     context.fillRect(this.#x, this.#y, this.#width, this.#height);
   }
 
+  /**
+   * modifie la taille des cartes
+   */
   reajusterCartes() {
     this.#cardPos = this.#x + (this.#width / 2 - cardWidth / 2);
     if (this.#listeCartes[0] != undefined) {
@@ -1126,6 +1260,10 @@ class Main {
     return this.#listeCartes;
   }
 
+  /**
+   * Enlève une carte de la main
+   * @param {Carte} carte 
+   */
   retirerCarte(carte) {
     let carteTrouvee = false;
     let distance;
@@ -1174,6 +1312,10 @@ class Main {
     }
   }
 
+  /**
+   * Ajoute une carte à la main
+   * @param {Carte} nouvCarte 
+   */
   ajoutCarte(nouvCarte) {
     let distance;
     inAnimationCard.push(nouvCarte);
@@ -1199,9 +1341,12 @@ class Main {
     }
   }
 
-  refreshPosInfo() {}
+  mouseHover() {}
 }
 
+/**
+ * Permet de récuppérer des cartes
+ */
 class Pioche {
   #x;
   #y;
@@ -1232,6 +1377,9 @@ class Pioche {
     return this.#height;
   }
 
+  /**
+   * Affiche l'élèment
+   */
   draw() {
     this.#x = canvas.width - canvas.width / 6;
     this.#y = canvas.height / 3;
@@ -1257,8 +1405,9 @@ class Pioche {
     );
   }
 
-  mouseHover() {}
-
+  /**
+   * Ajoute une nouvelle carte à la main
+   */
   mouseClick() {
     if (
       main.getListeCartes().length < 5 &&
@@ -1281,8 +1430,12 @@ class Pioche {
       canDraw = false;
     }
   }
+  mouseHover() {}
 }
 
+/**
+ * Permet de finir le tour du joueur
+ */
 class EndTurnButton {
   #x;
   #y;
@@ -1298,6 +1451,9 @@ class EndTurnButton {
     elements.push(this);
   }
 
+  /**
+   * Affiche l'élèment
+   */
   draw() {
     this.#x = canvas.width - canvas.width / 6;
     this.#y = canvas.height / 1.2;
@@ -1325,6 +1481,9 @@ class EndTurnButton {
 
   mouseHover() {}
 
+  /**
+   * Déclanche la fin du tour
+   */
   mouseClick() {
     if (inAnimationCard.length == 0 && !endTurn) {
       let audio = new Audio("./son/Soshite_jibun_no_ban_o_oeru_4.mp3");
@@ -1352,121 +1511,138 @@ class EndTurnButton {
   }
 }
 
+/**
+ * Pose les carte de l'adversaire
+ */
 class Ia {
-    constructor() {
+  constructor() {}
+  /**
+  * Pose les carte de l'adversaire
+  */
+  play() {
+    let availablePlace = [];
+    for (let i = 0; i < 4; i++) {
+      if (plateau.getCard(i) == undefined) {
+        console.log(i);
+        availablePlace.push(i);
+      }
     }
+    if (availablePlace.length > 0) {
+      let pos =
+        availablePlace[Math.floor(Math.random() * availablePlace.length)];
+      let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
 
-    play() {
-        let availablePlace = [];
-        for (let i = 0; i < 4; i++) {
-            if (plateau.getCard(i) == undefined) {
-                console.log(i);
-                availablePlace.push(i);
-            }
-        }
-        if (availablePlace.length > 0) {
-            let pos =
-                availablePlace[
-                    Math.floor(Math.random() * availablePlace.length)
-                ];
-            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+      if (randCard.getCout() <= ennemiPA.getPA()) {
+        console.log("COUT < PA");
+        let newCard = new Carte(
+          randCard.getImageSrc(),
+          randCard.getNom(),
+          randCard.getHpmax(),
+          randCard.getAtk(),
+          randCard.getType(),
+          randCard.getCout(),
+          randCard.getEffet()
+        );
+        newCard.visible(1, 1, false);
 
-            if (randCard.getCout() <= ennemiPA.getPA()){
-                console.log("COUT < PA");
-                let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(),randCard.getCout(),randCard.getEffet());
-                newCard.visible(1, 1, false);
-
-                plateau.addCard(newCard, pos);
-                ennemiPA.retirerPA(randCard.getCout());
-            }
-            
-
-        }
+        plateau.addCard(newCard, pos);
+        ennemiPA.retirerPA(randCard.getCout());
+      }
     }
+  }
 }
 
+/**
+ * S'occupe de la gestion des points d'action
+ */
 class pointsAction {
-    #x;
-    #y;
-    #pA;
-    #width;
-    #height;
-    #joueur;
+  #x;
+  #y;
+  #pA;
+  #width;
+  #height;
+  #joueur;
 
-    constructor(j) {
-        this.#x = canvas.width - canvas.width / 1.1;
-        this.#y = canvas.height / 1.2;
-        this.#width = canvas.width / 20;
-        this.#height = canvas.height / 10;
-        this.#pA = 0;
-        this.#joueur = j;
-        drawElement.push(this);
-        elements.push(this);
+  constructor(j) {
+    this.#x = canvas.width - canvas.width / 1.1;
+    this.#y = canvas.height / 1.2;
+    this.#width = canvas.width / 20;
+    this.#height = canvas.height / 10;
+    this.#pA = 0;
+    this.#joueur = j;
+    drawElement.push(this);
+    elements.push(this);
+  }
+
+  /**
+   * Affiche l'élèment
+   */
+  draw() {
+    if (this.#joueur) {
+      this.#x = canvas.width - canvas.width / 1.1;
+      this.#y = canvas.height / 1.2;
+      this.#width = canvas.width / 20;
+      this.#height = canvas.height / 10;
+
+      context.fillStyle = "gray";
+      context.beginPath();
+      context.moveTo(this.#x, this.#y);
+      context.lineTo(this.#x + this.#width / 1.5, this.#y);
+      context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+      context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+      context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+      context.lineTo(this.#x, this.#y + this.#height);
+      context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+      context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+      context.lineTo(this.#x, this.#y);
+      context.closePath();
+      context.fill();
+      context.font = canvas.width / 65 + "px Arial";
+      context.fillStyle = "black";
+      context.fillText(
+        this.#pA + " PA",
+        this.#x + this.#width / 3,
+        this.#y + this.#height / 1.75
+      );
     }
+  }
 
-    draw() {
+  mouseHover() {}
 
-        if (this.#joueur){
-            this.#x = canvas.width - canvas.width / 1.1;
-            this.#y = canvas.height / 1.2;
-            this.#width = canvas.width / 20;
-            this.#height = canvas.height / 10;
+  mouseClick() {}
 
-            context.fillStyle = 'gray';
-            context.beginPath();
-            context.moveTo(this.#x, this.#y);
-            context.lineTo(this.#x + this.#width / 1.5, this.#y);
-            context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
-            context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
-            context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
-            context.lineTo(this.#x, this.#y + this.#height);
-            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
-            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
-            context.lineTo(this.#x, this.#y);
-            context.closePath();
-            context.fill();
-            context.font = canvas.width / 65 + 'px Arial';
-            context.fillStyle = 'black';
-            context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
-        }
-    }
+  getX() {
+    return this.#x;
+  }
+  getY() {
+    return this.#y;
+  }
 
-    mouseHover() {
+  getWidth() {
+    return this.#width;
+  }
+  getHeight() {
+    return this.#height;
+  }
 
-    }
+  getPA() {
+    return this.#pA;
+  }
 
-    mouseClick() {
-    }
+  ajoutPA(i) {
+    this.#pA += i;
+  }
 
-    getX() {
-        return this.#x;
-    }
-    getY() {
-        return this.#y;
-    }
-
-    getWidth() {
-        return this.#width;
-    }
-    getHeight() {
-        return this.#height;
-    }
-
-    getPA() {
-        return this.#pA;
-    }
-
-    ajoutPA(i) {
-        this.#pA += i;
-    }
-
-    retirerPA(i){
-        this.#pA -= i;
-    }
+  retirerPA(i) {
+    this.#pA -= i;
+  }
 }
 
 /// - Effets - ////////////////////////////////////////////////////////////////
 
+/**
+ * S'occupe de la gestion des effet par défaut des cartes
+ */
 class Effet {
   nomEffet = "Effet par défaut";
   idEffet = 0;
@@ -1474,20 +1650,48 @@ class Effet {
 
   constructor() {}
 
+  /**
+   * Retourne la liste des carte impacter par l'effet
+   * @param {Array} listCarteJoueur 
+   * @param {Array} listCarteEnemie 
+   * @param {number} pos 
+   * @returns 
+   */
   getCartImpacter(listCarteJoueur, listCarteEnemie, pos) {
     let listCarteReturn = new Array(0);
     listCarteReturn.push(listCarteEnemie[pos]);
     return listCarteReturn;
   }
 
+  /**
+   * donne l'intensité de l'action de la carte
+   * @param {*} listCarteJoueur 
+   * @param {*} listCarteEnemie 
+   * @param {*} pos 
+   * @returns 
+   */
   actionCarte(listCarteJoueur, listCarteEnemie, pos) {
     return listCarteJoueur[pos].getAtk();
   }
 
+  /**
+   * Applique la défense de la carte
+   * @param {Carte} carteJoueur 
+   * @param {Carte} carteImpacter 
+   * @param {number} intensite 
+   * @returns 
+   */
   defence(carteJoueur, carteImpacter, intensite) {
     return intensite;
   }
 
+  /**
+   * Applique la modification de l'effet soin
+   * @param {Carte} carteJoueur 
+   * @param {Carte} carteImpacter 
+   * @param {number} intensite 
+   * @returns 
+   */
   soin(carteJoueur, carteImpacter, intensite) {
     return intensite;
   }
@@ -1557,8 +1761,14 @@ class Duplication extends Effet {
   }
 }
 
-/// - API - ////////////////////////////////////////////////////////////////
+/// - API - ///////////////////////////////////////////////////////////////////
 
+/**
+ * Fait les requête à la base de donnée pour récupérer les information du jeu
+ * @param {*} requeste 
+ * @param {*} parameter 
+ * @returns 
+ */
 async function requestToBDD(requeste, parameter) {
   let requestFile;
   let requestParameter;
@@ -1581,15 +1791,3 @@ async function requestToBDD(requeste, parameter) {
   return await request.json();
 }
 
-function getEffet(effetid) {
-  switch (effetid) {
-    case null:
-      return new Effet();
-      break;
-    case 1:
-      return new Duplication();
-    default:
-      return new Effet();
-      break;
-  }
-}
