@@ -78,87 +78,103 @@ donnerCarte.then((data) => {
 });
 
 function lancerPartie() {
-  context = canvas.getContext("2d");
-  maxWidth = 1920;
-  maxHeight = 1080;
-  let ratioW = maxWidth / window.innerWidth;
-  let ratioH = maxHeight / window.innerHeight;
+    context = canvas.getContext("2d");
+    maxWidth = 1920;
+    maxHeight = 1080;
+    let ratioW = maxWidth / window.innerWidth;
+    let ratioH = maxHeight / window.innerHeight;
 
-  if (ratioW < ratioH) {
-    (canvas.width = (maxWidth * 1) / ratioH),
-      (canvas.height = (maxHeight * 1) / ratioH);
-  } else {
-    (canvas.width = (maxWidth * 1) / ratioW),
-      (canvas.height = (maxHeight * 1) / ratioW);
-  }
-
-  aspectRatio = 16 / 9;
-
-  rect = canvas.getBoundingClientRect();
-  (offSetX = canvas.width / rect.width),
-    (offSetY = canvas.height / rect.height);
-
-  canvas.addEventListener("mousemove", (event) => {
-    let x = (event.x - rect.left) * offSetX;
-    let y = (event.y - rect.top) * offSetY;
-    elements.forEach((elem) => elem.mouseHover(x, y));
-  });
-
-  canvas.addEventListener("click", (event) => {
-    let x = (event.x - rect.left) * offSetX;
-    let y = (event.y - rect.top) * offSetY;
-    let clicked = false;
-    let i = 0;
-    while (i < elements.length && !clicked) {
-      let xElem = elements[i].getX();
-      let yElem = elements[i].getY();
-      let widthElem = elements[i].getWidth();
-      let heightElem = elements[i].getHeight();
-      if (
-        x > xElem &&
-        x < xElem + widthElem &&
-        y > yElem &&
-        y < yElem + heightElem
-      ) {
-        elements[i].mouseClick();
-        clicked = true;
-      }
-      i++;
+    if (ratioW < ratioH) {
+        (canvas.width = (maxWidth * 1) / ratioH),
+            (canvas.height = (maxHeight * 1) / ratioH);
+    } else {
+        (canvas.width = (maxWidth * 1) / ratioW),
+            (canvas.height = (maxHeight * 1) / ratioW);
     }
-  });
 
-  context.lineWidth = canvas.width / 100;
+    aspectRatio = 16 / 9;
 
-  endTurn = false;
+    rect = canvas.getBoundingClientRect();
+    (offSetX = canvas.width / rect.width),
+        (offSetY = canvas.height / rect.height);
 
-  canDraw = true;
-  canPlay = true;
+    canvas.addEventListener("mousemove", (event) => {
+        //console.log(event);
+        let x = (event.x - rect.left) * offSetX;
+        let y = (event.y - rect.top) * offSetY;
+        elements.forEach((elem) => elem.mouseHover(x, y));
+    });
 
-  drawElement = [];
-  elements = [];
-  inAnimationCard = [];
+    canvas.addEventListener("click", (event) => {
+        let x = (event.x - rect.left) * offSetX;
+        let y = (event.y - rect.top) * offSetY;
+        let clicked = false;
+        let i = 0;
+        while (i < elements.length && !clicked) {
+            let xElem = elements[i].getX();
+            let yElem = elements[i].getY();
+            let widthElem = elements[i].getWidth();
+            let heightElem = elements[i].getHeight();
+            if (
+                x > xElem &&
+                x < xElem + widthElem &&
+                y > yElem &&
+                y < yElem + heightElem
+            ) {
+                elements[i].mouseClick();
+                clicked = true;
+            }
+            i++;
+        }
+    });
 
-  plateau = new Plateau();
-  drawElement.push(plateau);
+    context.lineWidth = canvas.width / 100;
 
-  jaugeVie = new JaugeVie();
-  drawElement.push(jaugeVie);
+    endTurn = false;
 
-  ia = new Ia();
+    canDraw = true;
+    canPlay = true;
 
-  main = new Main();
-  drawElement.push(main);
+    drawElement = [];
+    elements = [];
+    inAnimationCard = [];
 
-  pioche = new Pioche();
+    plateau = new Plateau();
+    drawElement.push(plateau);
+    //palteau.animate();
 
-  endTurnButton = new EndTurnButton();
+    jaugeVie = new JaugeVie();
+    drawElement.push(jaugeVie);
 
-  pA = new pointsAction();
-  pA.setPA(4);
+    ia = new Ia();
 
-  let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
-  audio.play();
-  drawAll(0);
+    main = new Main();
+    drawElement.push(main);
+
+    pioche = new Pioche();
+
+    endTurnButton = new EndTurnButton();
+
+    pA = new pointsAction(true);
+    ennemiPA = new pointsAction(false);
+
+    pA.ajoutPA(1);
+    ennemiPA.ajoutPA(1);
+
+    let audio = new Audio('./son/ittsu_deeyueru_taimu_3.mp3')
+    audio.play();
+    //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
+    //plateau.addCard(carteTest,0);
+
+    //elements.push(pioche);
+    drawAll(0);
+    //carte.animate(50,50,100,200);
+
+    /*var img = new Image();
+    img.onload = ()=>{
+        context.drawImage(img,0,0);
+    };
+    img.src = './boo.jpg';*/
 }
 
 for (let index = 0; index < demarrer.length; index++) {
@@ -420,11 +436,116 @@ class Plateau {
           }
           carteFinTour = false;
 
-          let ennemieAttaque = new Promise((resolve) => {
-            if (this.#cardListEnemie[i] != undefined) {
-              this.#cardListEnemie[i].attakAnimation();
-            } else {
-              resolve();
+    action() {
+        endTurn = false;
+        canDraw = true;
+        canPlay = true;
+
+        var i = 0;
+
+        var fonctionAtk = () => {
+            if (i < this.#cardListJoueur.length) {
+                let joueurAttaque = new Promise((resolve) => {
+                    console.log("tour " + i);
+                    console.log("attaque joueur");
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].attakAnimation();
+                    } else {
+                        resolve();
+                    }
+                    var verif = () => {
+                        if (carteFinTour) {
+                            console.log("fin tour joueur");
+                            resolve();
+                        } else {
+                            setTimeout(() => {
+                                verif();
+                            }, 100);
+                        }
+                    };
+                    verif();
+                });
+                joueurAttaque.then(() => {
+                    if (this.#cardListJoueur[i] != undefined) {
+                        this.#cardListJoueur[i].tourCarte(
+                            this.#cardListJoueur,
+                            this.#cardListEnemie,
+                            true
+                        );
+                    }
+                    carteFinTour = false;
+
+                    let ennemieAttaque = new Promise((resolve) => {
+                        console.log("attaque enemie");
+                        if (this.#cardListEnemie[i] != undefined) {
+                            console.log("entre dans anim enemie");
+                            console.log(this.#cardListEnemie[i]);
+                            this.#cardListEnemie[i].attakAnimation();
+                        } else {
+                            console.log("va dans le resolve undefined");
+                            resolve();
+                        }
+                        var verif = () => {
+                            if (carteFinTour) {
+                                console.log("fin tour enemie");
+                                resolve();
+                            } else {
+                                setTimeout(() => {
+                                    verif();
+                                }, 100);
+                            }
+                        };
+                        verif();
+                    });
+                    ennemieAttaque.then(() => {
+                        console.log("resove enemie");
+                        if (this.#cardListEnemie[i] != undefined) {
+                            this.#cardListEnemie[i].tourCarte(
+                                this.#cardListEnemie,
+                                this.#cardListJoueur,
+                                false
+                            );
+                        }
+                        carteFinTour = false;
+
+                        for (let j = 0; j < this.#cardListJoueur.length; j++) {
+                            if (this.#cardListJoueur[j] != undefined) {
+                                if (this.#cardListJoueur[j].getHp() <= 0) {
+                                    this.listeEmplacements[j].setFree();
+                                    this.#cardListJoueur[j] = undefined;
+                                }
+                                if (this.#cardListEnemie[j] != undefined)
+                                    if (this.#cardListEnemie[j].getHp() <= 0) {
+                                        this.listeEmplacements[j].setFree();
+                                        this.#cardListEnemie[j] = undefined;
+                                    }
+                            }
+                        }
+                        i++;
+                        fonctionAtk();
+                    })
+                })
+            }
+            else{
+                console.log('fin total');
+                if(this.pvJauge > 19 || this.pvJauge <1){
+                    console.log("partie finie");
+                    finPartie();
+                }
+            }
+        };
+
+        pA.ajoutPA(1);
+        ennemiPA.ajoutPA(1);
+        fonctionAtk();
+
+        console.log("entré dans action");
+        /*for (let i = 0; i < this.#cardListJoueur.length; i++) {
+            console.log('tour' + i);
+            console.log('j');
+            console.log(this.#cardListJoueur[i]);
+            if (this.#cardListJoueur[i] != undefined) {
+                this.#cardListJoueur[i].tourCarte(this.#cardListJoueur, this.#cardListEnemie, true);
             }
             var verif = () => {
               if (carteFinTour) {
@@ -1322,113 +1443,116 @@ class EndTurnButton {
 }
 
 class Ia {
-  constructor() {}
-
-  play() {
-    let availablePlace = [];
-    for (let i = 0; i < 4; i++) {
-      if (plateau.getCard(i) == undefined) {
-        availablePlace.push(i);
-      }
+    constructor() {
     }
-    if (availablePlace.length > 0) {
-      let pos =
-        availablePlace[Math.floor(Math.random() * availablePlace.length)];
-      let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-      let newCard = new Carte(
-        randCard.getImageSrc(),
-        randCard.getNom(),
-        randCard.getHpmax(),
-        randCard.getAtk(),
-        randCard.getType(),
-        randCard.getCout(),
-        randCard.getEffet()
-      );
-      newCard.visible(1, 1, false);
 
-      plateau.addCard(newCard, pos);
+    play() {
+        let availablePlace = [];
+        for (let i = 0; i < 4; i++) {
+            if (plateau.getCard(i) == undefined) {
+                console.log(i);
+                availablePlace.push(i);
+            }
+        }
+        if (availablePlace.length > 0) {
+            let pos =
+                availablePlace[
+                    Math.floor(Math.random() * availablePlace.length)
+                ];
+            let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
+
+            if (randCard.getCout() <= ennemiPA.getPA()){
+                console.log("COUT < PA");
+                let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(),randCard.getCout(),randCard.getEffet());
+                newCard.visible(1, 1, false);
+
+                plateau.addCard(newCard, pos);
+                ennemiPA.retirerPA(randCard.getCout());
+            }
+            
+
+        }
     }
-  }
 }
 
 class pointsAction {
-  #x;
-  #y;
-  #pA;
-  #width;
-  #height;
+    #x;
+    #y;
+    #pA;
+    #width;
+    #height;
+    #joueur;
 
-  constructor() {
-    this.#x = canvas.width - canvas.width / 1.1;
-    this.#y = canvas.height / 1.2;
-    this.#width = canvas.width / 20;
-    this.#height = canvas.height / 10;
-    this.#pA = 0;
-    drawElement.push(this);
-    elements.push(this);
-  }
+    constructor(j) {
+        this.#x = canvas.width - canvas.width / 1.1;
+        this.#y = canvas.height / 1.2;
+        this.#width = canvas.width / 20;
+        this.#height = canvas.height / 10;
+        this.#pA = 0;
+        this.#joueur = j;
+        drawElement.push(this);
+        elements.push(this);
+    }
 
-  draw() {
-    this.#x = canvas.width - canvas.width / 1.1;
-    this.#y = canvas.height / 1.2;
-    this.#width = canvas.width / 20;
-    this.#height = canvas.height / 10;
+    draw() {
 
-    context.fillStyle = "gray";
-    context.beginPath();
-    context.moveTo(this.#x, this.#y);
-    context.lineTo(this.#x + this.#width / 1.5, this.#y);
-    context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
-    context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
-    context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
-    context.lineTo(this.#x, this.#y + this.#height);
-    context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
-    context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
-    context.lineTo(this.#x, this.#y);
-    context.closePath();
-    context.fill();
-    context.font = canvas.width / 65 + "px Arial";
-    context.fillStyle = "black";
-    context.fillText(
-      this.#pA + " PA",
-      this.#x + this.#width / 3,
-      this.#y + this.#height / 1.75
-    );
-  }
+        if (this.#joueur){
+            this.#x = canvas.width - canvas.width / 1.1;
+            this.#y = canvas.height / 1.2;
+            this.#width = canvas.width / 20;
+            this.#height = canvas.height / 10;
 
-  mouseHover() {}
+            context.fillStyle = 'gray';
+            context.beginPath();
+            context.moveTo(this.#x, this.#y);
+            context.lineTo(this.#x + this.#width / 1.5, this.#y);
+            context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+            context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+            context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+            context.lineTo(this.#x, this.#y + this.#height);
+            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+            context.lineTo(this.#x, this.#y);
+            context.closePath();
+            context.fill();
+            context.font = canvas.width / 65 + 'px Arial';
+            context.fillStyle = 'black';
+            context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
+        }
+    }
 
-  mouseClick() {}
+    mouseHover() {
 
-  getX() {
-    return this.#x;
-  }
-  getY() {
-    return this.#y;
-  }
+    }
 
-  getWidth() {
-    return this.#width;
-  }
-  getHeight() {
-    return this.#height;
-  }
+    mouseClick() {
+    }
 
-  getPA() {
-    return this.#pA;
-  }
+    getX() {
+        return this.#x;
+    }
+    getY() {
+        return this.#y;
+    }
 
-  setPA(val) {
-    this.#pA = val;
-  }
+    getWidth() {
+        return this.#width;
+    }
+    getHeight() {
+        return this.#height;
+    }
 
-  ajoutPA(i) {
-    this.#pA =  Math.min(i+this.#pA, 7);
-  }
+    getPA() {
+        return this.#pA;
+    }
 
-  retirerPA(i) {
-    this.#pA -= i;
-  }
+    ajoutPA(i) {
+        this.#pA += i;
+    }
+
+    retirerPA(i){
+        this.#pA -= i;
+    }
 }
 
 /// - Effets - ////////////////////////////////////////////////////////////////
