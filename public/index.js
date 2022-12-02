@@ -854,6 +854,17 @@ class Carte {
       this.#x + this.#width / 5.5,
       this.#y + this.#height / 1.1
     );
+
+    let img = this.#effet.imgEffet;
+    if (img != undefined) {
+      context.drawImage(
+        img,
+        this.#x + this.#width/2.8,
+        this.#y + this.#height/1.4,
+        this.#width/3.5,
+        this.#height/4.5,
+      )
+    }
   }
 
   /**
@@ -1626,12 +1637,18 @@ class pointsAction {
  * S'occupe de la gestion des effet par défaut des cartes
  */
 class Effet {
-  nomEffet = "Effet par défaut";
-  idEffet = 0;
+  #nomEffet = "Effet par défaut";
+  #idEffet = 0;
   imgEffet;
 
-  constructor() {}
-
+  constructor(nom, id, img) {
+    if (nom!=undefined) {
+      this.#nomEffet = nom;
+    }if (id!=undefined) {
+      this.#idEffet = id;
+    }
+    this.imgEffet = img;
+  }
   /**
    * Retourne la liste des carte impacter par l'effet
    * @param {Array} listCarteJoueur 
@@ -1692,9 +1709,9 @@ class Vol extends Effet {
 
 class Duplication extends Effet {
   constructor() {
-    super();
-    this.nomEffet = "duplication";
-    this.idEffet = 2;
+    let imgEffet = new Image();
+    imgEffet.src = './images/logo_duplication.png';
+    super("duplication",2,imgEffet);
   }
 
   actionCarte(listCarteJoueur, listCarteEnemie, pos) {
