@@ -2,35 +2,48 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  background-color: rgba(241, 233, 136, 0.5);
 }
 
-#regles
-{
+#logo{
+  width: 75%;
+}
+
+h1{
+  margin-bottom: 2%;
+  color: red;
+  font-size: 200%;
+}
+
+#regles{
   display: flex;
   justify-self: center;
   align-items: center;
   flex-direction: column;
 }
 
-#texte
-{
+#texte{
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 
-img
-{
+.illustration{
   margin: 2%;
 }
 
-#img_exemples
-{
+#img_exemples{
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: row;
+}
+
+button{
+  padding : 1%;
+  background-color : rgb(160, 82, 82);
+  margin: 2%;
 }
 
 
