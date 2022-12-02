@@ -154,7 +154,8 @@ function lancerPartie() {
     pA.ajoutPA(1);
 
 
-
+    let audio = new Audio('./son/ittsu_deeyueru_taimu_3.mp3')
+    audio.play();
     //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
     //plateau.addCard(carteTest,0);
 
@@ -1408,9 +1409,14 @@ class EndTurnButton {
 
     mouseClick() {
         if (inAnimationCard.length == 0) {
-            endTurn = true;
-            ia.play();
-            plateau.action();
+            let audio = new Audio('./son/Soshite_jibun_no_ban_o_oeru_4.mp3');
+            audio.play();
+            setTimeout(()=>{
+                endTurn = true},2500);
+            setTimeout(ia.play,2500);
+            setTimeout( ()=>{
+                plateau.action()
+            } ,2700);
         }
     }
 
