@@ -150,9 +150,11 @@ function lancerPartie() {
 
     endTurnButton = new EndTurnButton();
 
-    pA = new pointsAction();
-    pA.ajoutPA(1);
+    pA = new pointsAction(true);
+    ennemiPA = new pointsAction(false);
 
+    pA.ajoutPA(1);
+    ennemiPA.ajoutPA(1);
 
     let audio = new Audio('./son/ittsu_deeyueru_taimu_3.mp3')
     audio.play();
@@ -520,6 +522,7 @@ class Plateau {
         };
 
         pA.ajoutPA(1);
+        ennemiPA.ajoutPA(1);
         fonctionAtk();
 
         console.log("entré dans action");
@@ -1500,10 +1503,16 @@ class Ia {
                     Math.floor(Math.random() * availablePlace.length)
                 ];
             let randCard = listCarte[Math.floor(Math.random() * listCarte.length)];
-            let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(),randCard.getCout(),randCard.getEffet());
-            newCard.visible(1, 1, false);
 
-            plateau.addCard(newCard, pos);
+            if (randCard.getCout() <= ennemiPA.getPA()){
+                console.log("COUT < PA");
+                let newCard = new Carte(randCard.getImageSrc(),randCard.getNom(), randCard.getHpmax(),randCard.getAtk(), randCard.getType(),randCard.getCout(),randCard.getEffet());
+                newCard.visible(1, 1, false);
+
+                plateau.addCard(newCard, pos);
+                ennemiPA.retirerPA(randCard.getCout());
+            }
+            
 
         }
     }
@@ -1516,40 +1525,44 @@ class pointsAction {
     #pA;
     #width;
     #height;
+    #joueur;
 
-    constructor() {
+    constructor(j) {
         this.#x = canvas.width - canvas.width / 1.1;
         this.#y = canvas.height / 1.2;
         this.#width = canvas.width / 20;
         this.#height = canvas.height / 10;
         this.#pA = 0;
+        this.#joueur = j;
         drawElement.push(this);
         elements.push(this);
     }
 
     draw() {
 
-        this.#x = canvas.width - canvas.width / 1.1;
-        this.#y = canvas.height / 1.2;
-        this.#width = canvas.width / 20;
-        this.#height = canvas.height / 10;
+        if (this.#joueur){
+            this.#x = canvas.width - canvas.width / 1.1;
+            this.#y = canvas.height / 1.2;
+            this.#width = canvas.width / 20;
+            this.#height = canvas.height / 10;
 
-        context.fillStyle = 'gray';
-        context.beginPath();
-        context.moveTo(this.#x, this.#y);
-        context.lineTo(this.#x + this.#width / 1.5, this.#y);
-        context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
-        context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
-        context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
-        context.lineTo(this.#x, this.#y + this.#height);
-        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
-        context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
-        context.lineTo(this.#x, this.#y);
-        context.closePath();
-        context.fill();
-        context.font = canvas.width / 65 + 'px Arial';
-        context.fillStyle = 'black';
-        context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
+            context.fillStyle = 'gray';
+            context.beginPath();
+            context.moveTo(this.#x, this.#y);
+            context.lineTo(this.#x + this.#width / 1.5, this.#y);
+            context.lineTo(this.#x + this.#width, this.#y + this.#height / 3);
+            context.lineTo(this.#x + this.#width, this.#y + this.#height / 1.5);
+            context.lineTo(this.#x + this.#width / 1.5, this.#y + this.#height);
+            context.lineTo(this.#x, this.#y + this.#height);
+            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 1.5);
+            context.lineTo(this.#x - this.#width / 3, this.#y + this.#height / 3);
+            context.lineTo(this.#x, this.#y);
+            context.closePath();
+            context.fill();
+            context.font = canvas.width / 65 + 'px Arial';
+            context.fillStyle = 'black';
+            context.fillText(this.#pA + " PA", this.#x + this.#width / 3, this.#y + this.#height / 1.75);
+        }
     }
 
     mouseHover() {
