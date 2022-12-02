@@ -72,3 +72,15 @@ canvas{
   background-color: gray;
   border: 2px solid black;
 }
+
+#effet{
+  display: none;
+  justify-self: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+table,
+td {
+    border: 1px solid #333;
+}
