@@ -159,18 +159,9 @@ function lancerPartie() {
 
   let audio = new Audio("./son/ittsu_deeyueru_taimu_3.mp3");
   audio.play();
-  //let carteTest = new Carte('./images/boo.jpg', 1, 1, 'Carte test',8,1);
-  //plateau.addCard(carteTest,0);
 
-  //elements.push(pioche);
   drawAll(0);
-  //carte.animate(50,50,100,200);
 
-  /*var img = new Image();
-    img.onload = ()=>{
-        context.drawImage(img,0,0);
-    };
-    img.src = './boo.jpg';*/
 }
 
 /**
@@ -192,7 +183,7 @@ function drawAll() {
   });
 }
 /**
- * Recalcule les éléments du canvas quand celui ci est redimmensioné
+ * Recalcule la dimension des éléments du canvas quand celui ci est redimmensioné
  */
 function resize() {
   let ratioW = maxWidth / window.innerWidth;
