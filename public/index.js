@@ -1781,7 +1781,7 @@ async function requestToBDD(requeste, parameter) {
       return null;
   }
   let request = await fetch(
-    `http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/JSON/${requestFile}`,
+    `http://saejvjmmh.duckdns.org/sae-on-trouvera-plus-tard/site_web/API/${requestFile}`,
     { method: "post" }
   );
   return await request.json();
